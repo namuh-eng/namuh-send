@@ -27,7 +27,10 @@
       "*.config.js",
       "postcss.config.js",
       "coverage",
-      ".omc"
+      ".omc",
+      "drizzle",
+      "*.d.ts",
+      "public"
     ]
   }
 }

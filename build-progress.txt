@@ -327,3 +327,38 @@
 - src/components/api-keys-list.tsx — Enhanced modal with domain disable logic, Add button disable, token reveal
 - src/components/modal.tsx — Added actionDisabled prop for disabling action button
 - tests/api-keys-modal.test.tsx — 8 unit tests for modal behavior
+
+## Iteration 12 — feature-032: API Key Detail Page (2026-03-29)
+
+### What was built
+- API Key detail page (`src/app/(dashboard)/api-keys/[id]/page.tsx`) — server component that fetches key metadata, domain name, total uses (log count), last used timestamp
+- `ApiKeyDetail` client component (`src/components/api-key-detail.tsx`) with:
+  - Breadcrumb navigation (API Keys / API Key)
+  - Lock icon + key name as h1 heading
+  - 7 metadata fields in 4-column grid: Permission, Domain, Total Uses (linked to /logs?api_key=:id), Token (truncated), Last Used, Created, Creator (with avatar)
+  - More actions dropdown: Edit API key, Go to docs, Delete API key
+  - Edit modal with pre-filled Name, Permission, Domain fields + Save button
+  - Delete confirmation modal with destructive action
+- GET /api/api-keys/:id — returns single API key details
+- PATCH /api/api-keys/:id — updates name, permission, domain_id
+- DELETE /api/api-keys/:id — deletes API key and redirects to list
+
+### Test results
+- 8 new unit tests passing (metadata fields, total uses link, more actions dropdown, edit modal pre-filled, save edit, delete confirmation, lock icon, token truncated)
+- 1 E2E test written (edit API key name flow)
+- 172 total tests passing (164 previous + 8 new), no regressions
+- make check: typecheck + lint passing
+
+### Decisions
+- Total uses count fetched via logs table COUNT query filtered by api_key_id
+- Last used derived from most recent log entry for the API key
+- Creator email hardcoded to jaeyunha@foreverbrowsing.com (no user auth system)
+- Edit modal reuses same form pattern as Create modal with permission/domain logic
+- Token always shown truncated (keyPrefix), never full key after creation
+
+### Files changed
+- src/components/api-key-detail.tsx — ApiKeyDetail client component with metadata, edit modal, delete modal
+- src/app/(dashboard)/api-keys/[id]/page.tsx — Server component fetching key + domain + logs data
+- src/app/api/api-keys/[id]/route.ts — GET, PATCH, DELETE endpoints for single API key
+- tests/api-key-detail.test.tsx — 8 unit tests for API Key detail page
+- tests/e2e/api-key-detail.spec.ts — E2E test for editing API key name
