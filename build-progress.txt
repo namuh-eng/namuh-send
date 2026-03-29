@@ -1021,3 +1021,33 @@
 - src/components/broadcast-editor.tsx — Added block editor with slash commands, BlockRenderer, bottom toolbar
 - tests/block-editor.test.tsx — 8 unit tests for block editor functionality
 - tests/e2e/broadcast-editor.spec.ts — Added E2E test for slash command heading insertion
+
+## Iteration 32 — feature-011: Broadcast Editor Right Sidebar (2026-03-29)
+
+### What was built
+- Right sidebar component (`broadcast-editor-sidebar.tsx`) with 3 collapsible panels: Page Style, Theme, Global CSS
+- Page Style panel: Background (color picker, padding), Body (3 layout options: full/centered/narrow, color, width default 600px, height, padding, rounded corners, border width + color)
+- Theme panel: 2 presets (Minimal, Basic) that switch all typography at once, 4 text style levels (Text 14px Regular, Title 31px Semi Bold, Subtitle 25px Semi Bold, Heading 19px Semi Bold) each with color, size, weight, height, spacing, decoration controls
+- Global CSS panel: code editor textarea with 3 quick-insert buttons (@media dark, @media mobile, .button) that inject CSS scaffolding
+- "Page style" toggle button in editor header to open/close sidebar
+- "Edit theme" and "Global CSS" quick-link buttons in Page Style panel to navigate between panels
+- Close sidebar button with X icon
+- Full BroadcastStyle data model with TypeScript types exported for reuse
+
+### Test results
+- 10 new unit tests passing (page style defaults, layouts, theme presets, text styles, global CSS, data model)
+- 4 E2E tests written (theme switching, page style defaults, global CSS quick-insert, close sidebar)
+- 370 total unit tests passing, no regressions
+- make check: typecheck + lint passing
+
+### Decisions
+- Sidebar is 300px fixed width, appears on right side of editor content area
+- Theme presets replace all text styles at once; individual overrides persist until next preset switch
+- Used collapsible sections for each panel group for clean organization
+- Color inputs combine native color picker with hex text input
+
+### Files changed
+- src/components/broadcast-editor-sidebar.tsx — New component with Page Style, Theme, Global CSS panels
+- src/components/broadcast-editor.tsx — Integrated sidebar toggle, state management, layout changes
+- tests/broadcast-editor-sidebar.test.ts — 10 unit tests for sidebar data model and defaults
+- tests/e2e/broadcast-editor-sidebar.spec.ts — 4 E2E tests for sidebar interactions

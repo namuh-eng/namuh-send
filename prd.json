@@ -1479,7 +1479,7 @@
     "data_model": "Broadcast style: { background: { color: string, padding: number }, body: { layout: 'full'|'centered'|'narrow', color: string, width: number, height: number|'auto', padding: number, borderRadius: number, borderWidth: number, borderColor: string }, theme: 'minimal'|'basic', textStyles: Record<'text'|'title'|'subtitle'|'heading', { color: string, fontSize: number, fontWeight: string, lineHeight: number, letterSpacing: number, decoration: 'none'|'underline'|'strikethrough' }>, globalCSS: string }",
     "priority": 13,
     "core": false,
-    "passes": false,
+    "passes": true,
     "tests": {
       "unit": [
         {

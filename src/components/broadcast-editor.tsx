@@ -2,6 +2,11 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  BroadcastEditorSidebar,
+  type BroadcastStyle,
+  DEFAULT_BROADCAST_STYLE,
+} from "./broadcast-editor-sidebar";
 
 // Block types for the editor
 type BlockType =
@@ -169,6 +174,12 @@ export function BroadcastEditor({
   const [activeToolbarTab, setActiveToolbarTab] = useState<
     "text" | "image" | "components" | "variables"
   >("text");
+
+  // Right sidebar state
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [broadcastStyle, setBroadcastStyle] = useState<BroadcastStyle>(
+    DEFAULT_BROADCAST_STYLE,
+  );
 
   const saveTimeout = useRef<ReturnType<typeof setTimeout>>(null);
   const topicDropdownRef = useRef<HTMLDivElement>(null);
@@ -358,6 +369,30 @@ export function BroadcastEditor({
         <div className="flex items-center gap-2">
           <button
             type="button"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label="Page style"
+            className={`h-8 px-3 text-[13px] font-medium border rounded-md transition-colors flex items-center gap-1.5 ${
+              sidebarOpen
+                ? "text-[#F0F0F0] border-[rgba(176,199,217,0.3)] bg-[rgba(176,199,217,0.08)]"
+                : "text-[#A1A4A5] border-[rgba(176,199,217,0.145)] hover:text-[#F0F0F0] hover:border-[rgba(176,199,217,0.3)]"
+            }`}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+            </svg>
+            Page style
+          </button>
+          <button
+            type="button"
             className="h-8 px-3 text-[13px] font-medium text-[#A1A4A5] border border-[rgba(176,199,217,0.145)] rounded-md hover:text-[#F0F0F0] hover:border-[rgba(176,199,217,0.3)] transition-colors flex items-center gap-1.5"
           >
             Test email
@@ -371,428 +406,441 @@ export function BroadcastEditor({
         </div>
       </div>
 
-      {/* Editor content */}
-      <div className="flex-1 overflow-auto">
-        <div className="max-w-[700px] mx-auto py-8 px-6">
-          {/* Form fields */}
-          <div className="space-y-0">
-            {/* From */}
-            <div className="flex items-start border-b border-[rgba(176,199,217,0.08)] py-3 relative">
-              <span className="text-[13px] text-[#A1A4A5] w-[100px] pt-1 shrink-0">
-                From
-              </span>
-              <div className="flex-1 relative">
-                <input
-                  type="text"
-                  value={from}
-                  placeholder="Acme <acme@example.com>"
-                  onChange={(e) => {
-                    setFrom(e.target.value);
-                    autoSave({ from: e.target.value });
-                  }}
-                  onFocus={() => setFromFocused(true)}
-                  onBlur={() => setTimeout(() => setFromFocused(false), 200)}
-                  className="w-full text-[14px] text-[#F0F0F0] bg-transparent border-none outline-none placeholder-[#666]"
-                />
-                {fromFocused && fromSuggestions.length > 0 && (
-                  <div className="absolute top-full left-0 mt-1 w-full bg-[#0a0a0a] border border-[rgba(176,199,217,0.145)] rounded-md shadow-lg z-50 py-1">
-                    {fromSuggestions.map((s) => (
+      {/* Editor content + sidebar */}
+      <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 overflow-auto">
+          <div className="max-w-[700px] mx-auto py-8 px-6">
+            {/* Form fields */}
+            <div className="space-y-0">
+              {/* From */}
+              <div className="flex items-start border-b border-[rgba(176,199,217,0.08)] py-3 relative">
+                <span className="text-[13px] text-[#A1A4A5] w-[100px] pt-1 shrink-0">
+                  From
+                </span>
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    value={from}
+                    placeholder="Acme <acme@example.com>"
+                    onChange={(e) => {
+                      setFrom(e.target.value);
+                      autoSave({ from: e.target.value });
+                    }}
+                    onFocus={() => setFromFocused(true)}
+                    onBlur={() => setTimeout(() => setFromFocused(false), 200)}
+                    className="w-full text-[14px] text-[#F0F0F0] bg-transparent border-none outline-none placeholder-[#666]"
+                  />
+                  {fromFocused && fromSuggestions.length > 0 && (
+                    <div className="absolute top-full left-0 mt-1 w-full bg-[#0a0a0a] border border-[rgba(176,199,217,0.145)] rounded-md shadow-lg z-50 py-1">
+                      {fromSuggestions.map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            const newFrom = from
+                              ? `${from.split("@")[0]}${s}`
+                              : `sender${s}`;
+                            setFrom(newFrom);
+                            autoSave({
+                              from: newFrom,
+                            });
+                            setFromFocused(false);
+                          }}
+                          className="w-full px-3 py-1.5 text-left text-[13px] text-[#A1A4A5] hover:bg-[rgba(176,199,217,0.08)] hover:text-[#F0F0F0] transition-colors"
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {!showReplyTo && (
+                  <button
+                    type="button"
+                    onClick={() => setShowReplyTo(true)}
+                    className="text-[13px] text-[#A1A4A5] hover:text-[#F0F0F0] transition-colors shrink-0 ml-2"
+                  >
+                    Reply-To
+                  </button>
+                )}
+              </div>
+
+              {/* Reply-To (toggleable) */}
+              {showReplyTo && (
+                <div className="flex items-start border-b border-[rgba(176,199,217,0.08)] py-3">
+                  <span className="text-[13px] text-[#A1A4A5] w-[100px] pt-1 shrink-0">
+                    Reply-To
+                  </span>
+                  <input
+                    type="text"
+                    value={replyTo}
+                    placeholder="reply@example.com"
+                    onChange={(e) => {
+                      setReplyTo(e.target.value);
+                      autoSave({
+                        replyTo: e.target.value,
+                      });
+                    }}
+                    className="flex-1 text-[14px] text-[#F0F0F0] bg-transparent border-none outline-none placeholder-[#666]"
+                  />
+                </div>
+              )}
+
+              {/* To */}
+              <div className="flex items-start border-b border-[rgba(176,199,217,0.08)] py-3 relative">
+                <span className="text-[13px] text-[#A1A4A5] w-[100px] pt-1 shrink-0">
+                  To
+                </span>
+                <div className="flex-1 relative">
+                  {segmentId && selectedSegment ? (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[14px] text-[#F0F0F0] bg-[rgba(176,199,217,0.08)] px-2 py-0.5 rounded inline-flex items-center gap-1">
+                        {selectedSegment.name}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSegmentId(null);
+                            setTo("");
+                            autoSave({
+                              segmentId: null,
+                            });
+                          }}
+                          className="text-[#A1A4A5] hover:text-[#F0F0F0] ml-0.5"
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        type="text"
+                        value={to}
+                        placeholder="Select a segment..."
+                        onChange={(e) => setTo(e.target.value)}
+                        onFocus={() => setToFocused(true)}
+                        onBlur={() =>
+                          setTimeout(() => setToFocused(false), 200)
+                        }
+                        className="w-full text-[14px] text-[#F0F0F0] bg-transparent border-none outline-none placeholder-[#666]"
+                      />
+                      {toFocused && filteredSegments.length > 0 && (
+                        <div className="absolute top-full left-0 mt-1 w-full bg-[#0a0a0a] border border-[rgba(176,199,217,0.145)] rounded-md shadow-lg z-50 py-1">
+                          {filteredSegments.map((seg) => (
+                            <button
+                              key={seg.id}
+                              type="button"
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                setSegmentId(seg.id);
+                                setTo(seg.name);
+                                autoSave({
+                                  segmentId: seg.id,
+                                });
+                                setToFocused(false);
+                              }}
+                              className="w-full px-3 py-1.5 text-left text-[13px] text-[#A1A4A5] hover:bg-[rgba(176,199,217,0.08)] hover:text-[#F0F0F0] transition-colors"
+                            >
+                              {seg.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+                {!showWhen && (
+                  <button
+                    type="button"
+                    onClick={() => setShowWhen(true)}
+                    className="text-[13px] text-[#A1A4A5] hover:text-[#F0F0F0] transition-colors shrink-0 ml-2"
+                  >
+                    When
+                  </button>
+                )}
+              </div>
+
+              {/* When (toggleable) */}
+              {showWhen && (
+                <div className="flex items-start border-b border-[rgba(176,199,217,0.08)] py-3">
+                  <span className="text-[13px] text-[#A1A4A5] w-[100px] pt-1 shrink-0">
+                    When
+                  </span>
+                  <input
+                    type="datetime-local"
+                    value={scheduledAt}
+                    onChange={(e) => {
+                      setScheduledAt(e.target.value);
+                      autoSave({
+                        scheduledAt: e.target.value
+                          ? new Date(e.target.value).toISOString()
+                          : null,
+                      });
+                    }}
+                    className="flex-1 text-[14px] text-[#F0F0F0] bg-transparent border-none outline-none [color-scheme:dark]"
+                  />
+                </div>
+              )}
+
+              {/* Subscribe to */}
+              <div
+                className="flex items-start border-b border-[rgba(176,199,217,0.08)] py-3 relative"
+                ref={topicDropdownRef}
+              >
+                <span className="text-[13px] text-[#A1A4A5] w-[100px] pt-1 shrink-0">
+                  Subscribe to
+                </span>
+                <div className="flex-1 relative">
+                  <button
+                    type="button"
+                    onClick={() => setTopicDropdownOpen(!topicDropdownOpen)}
+                    className="flex items-center gap-1 text-[14px] text-[#A1A4A5] hover:text-[#F0F0F0] transition-colors"
+                  >
+                    <span>
+                      {selectedTopic ? selectedTopic.name : "Select a topic"}
+                    </span>
+                    <svg
+                      aria-hidden="true"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </button>
+                  {topicDropdownOpen && (
+                    <div className="absolute top-full left-0 mt-1 w-[240px] bg-[#0a0a0a] border border-[rgba(176,199,217,0.145)] rounded-md shadow-lg z-50 py-1">
                       <button
-                        key={s}
                         type="button"
                         onMouseDown={(e) => {
                           e.preventDefault();
-                          const newFrom = from
-                            ? `${from.split("@")[0]}${s}`
-                            : `sender${s}`;
-                          setFrom(newFrom);
-                          autoSave({
-                            from: newFrom,
-                          });
-                          setFromFocused(false);
+                          setTopicId(null);
+                          autoSave({ topicId: null });
+                          setTopicDropdownOpen(false);
                         }}
-                        className="w-full px-3 py-1.5 text-left text-[13px] text-[#A1A4A5] hover:bg-[rgba(176,199,217,0.08)] hover:text-[#F0F0F0] transition-colors"
+                        className={`w-full px-3 py-1.5 text-left text-[13px] hover:bg-[rgba(176,199,217,0.08)] transition-colors ${!topicId ? "text-[#F0F0F0]" : "text-[#A1A4A5]"}`}
                       >
-                        {s}
+                        None
                       </button>
+                      {topics.map((t) => (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            setTopicId(t.id);
+                            autoSave({
+                              topicId: t.id,
+                            });
+                            setTopicDropdownOpen(false);
+                          }}
+                          className={`w-full px-3 py-1.5 text-left text-[13px] hover:bg-[rgba(176,199,217,0.08)] transition-colors ${topicId === t.id ? "text-[#F0F0F0]" : "text-[#A1A4A5]"}`}
+                        >
+                          {t.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Subject */}
+              <div className="flex items-start border-b border-[rgba(176,199,217,0.08)] py-3">
+                <span className="text-[13px] text-[#A1A4A5] w-[100px] pt-1 shrink-0">
+                  Subject
+                </span>
+                <div className="flex-1 flex items-center">
+                  <input
+                    type="text"
+                    value={subject}
+                    placeholder="Subject"
+                    onChange={(e) => {
+                      setSubject(e.target.value);
+                      autoSave({
+                        subject: e.target.value,
+                      });
+                    }}
+                    className="flex-1 text-[14px] text-[#F0F0F0] bg-transparent border-none outline-none placeholder-[#666]"
+                  />
+                  {!showPreviewText && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPreviewText(true)}
+                      className="text-[13px] text-[#A1A4A5] hover:text-[#F0F0F0] transition-colors shrink-0 ml-2"
+                    >
+                      Preview text
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Preview text (toggleable) */}
+              {showPreviewText && (
+                <div className="flex items-start border-b border-[rgba(176,199,217,0.08)] py-3">
+                  <span className="text-[13px] text-[#A1A4A5] w-[100px] pt-1 shrink-0">
+                    Preview text
+                  </span>
+                  <input
+                    type="text"
+                    value={previewText}
+                    placeholder="Preview text (max 150 characters)"
+                    maxLength={150}
+                    onChange={(e) => {
+                      setPreviewText(e.target.value);
+                      autoSave({
+                        previewText: e.target.value,
+                      });
+                    }}
+                    className="flex-1 text-[14px] text-[#F0F0F0] bg-transparent border-none outline-none placeholder-[#666]"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Block Editor */}
+            <div className="mt-8 relative">
+              <div
+                data-testid="block-editor"
+                className="min-h-[400px] border border-[rgba(176,199,217,0.08)] rounded-lg p-4 relative"
+                onKeyDown={handleEditorKeyDown}
+                // biome-ignore lint/a11y/noNoninteractiveTabindex: editor needs keyboard focus for slash commands
+                tabIndex={0}
+                aria-label="Content editor"
+              >
+                {blocks.length === 0 && !slashMenuOpen && (
+                  <p className="text-[14px] text-[#666]">
+                    Press &apos;/&apos; for commands
+                  </p>
+                )}
+
+                {/* Rendered blocks */}
+                {blocks.map((block) => (
+                  <div
+                    key={block.id}
+                    data-testid={`block-${block.type}`}
+                    className="group relative mb-3"
+                  >
+                    <div className="absolute -left-8 top-1 opacity-0 group-hover:opacity-100 flex gap-0.5">
+                      <button
+                        type="button"
+                        onClick={() => removeBlock(block.id)}
+                        className="p-0.5 text-[#666] hover:text-red-400 text-xs"
+                        title="Remove block"
+                      >
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          aria-hidden="true"
+                        >
+                          <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                    <BlockRenderer
+                      block={block}
+                      onUpdate={(content) =>
+                        updateBlockContent(block.id, content)
+                      }
+                    />
+                  </div>
+                ))}
+
+                {/* Slash command menu */}
+                {slashMenuOpen && (
+                  <div
+                    ref={slashMenuRef}
+                    className="absolute left-4 z-50 w-[280px] max-h-[360px] overflow-y-auto bg-[#0a0a0a] border border-[rgba(176,199,217,0.145)] rounded-lg shadow-xl"
+                    style={{
+                      top:
+                        blocks.length > 0
+                          ? `${blocks.length * 48 + 16}px`
+                          : "16px",
+                    }}
+                  >
+                    {SLASH_MENU_ITEMS.map((category) => (
+                      <div key={category.category}>
+                        <div className="px-3 py-1.5 text-[11px] font-semibold text-[#666] uppercase tracking-wider">
+                          {category.category}
+                        </div>
+                        {category.items.map((item) => (
+                          <button
+                            key={item.type}
+                            type="button"
+                            onClick={() => insertBlock(item.type)}
+                            className="w-full px-3 py-2 text-left text-[13px] text-[#A1A4A5] hover:bg-[rgba(176,199,217,0.08)] hover:text-[#F0F0F0] transition-colors flex items-center gap-2.5"
+                          >
+                            <span className="w-6 h-6 flex items-center justify-center rounded bg-[rgba(176,199,217,0.06)] text-[11px] font-mono shrink-0">
+                              {item.icon}
+                            </span>
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
                     ))}
                   </div>
                 )}
               </div>
-              {!showReplyTo && (
+
+              {/* Pick a template / Upload HTML */}
+              <div className="flex items-center gap-3 mt-3">
                 <button
                   type="button"
-                  onClick={() => setShowReplyTo(true)}
-                  className="text-[13px] text-[#A1A4A5] hover:text-[#F0F0F0] transition-colors shrink-0 ml-2"
+                  className="flex items-center gap-1.5 text-[13px] text-[#A1A4A5] hover:text-[#F0F0F0] transition-colors"
                 >
-                  Reply-To
-                </button>
-              )}
-            </div>
-
-            {/* Reply-To (toggleable) */}
-            {showReplyTo && (
-              <div className="flex items-start border-b border-[rgba(176,199,217,0.08)] py-3">
-                <span className="text-[13px] text-[#A1A4A5] w-[100px] pt-1 shrink-0">
-                  Reply-To
-                </span>
-                <input
-                  type="text"
-                  value={replyTo}
-                  placeholder="reply@example.com"
-                  onChange={(e) => {
-                    setReplyTo(e.target.value);
-                    autoSave({
-                      replyTo: e.target.value,
-                    });
-                  }}
-                  className="flex-1 text-[14px] text-[#F0F0F0] bg-transparent border-none outline-none placeholder-[#666]"
-                />
-              </div>
-            )}
-
-            {/* To */}
-            <div className="flex items-start border-b border-[rgba(176,199,217,0.08)] py-3 relative">
-              <span className="text-[13px] text-[#A1A4A5] w-[100px] pt-1 shrink-0">
-                To
-              </span>
-              <div className="flex-1 relative">
-                {segmentId && selectedSegment ? (
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[14px] text-[#F0F0F0] bg-[rgba(176,199,217,0.08)] px-2 py-0.5 rounded inline-flex items-center gap-1">
-                      {selectedSegment.name}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSegmentId(null);
-                          setTo("");
-                          autoSave({
-                            segmentId: null,
-                          });
-                        }}
-                        className="text-[#A1A4A5] hover:text-[#F0F0F0] ml-0.5"
-                      >
-                        &times;
-                      </button>
-                    </span>
-                  </div>
-                ) : (
-                  <>
-                    <input
-                      type="text"
-                      value={to}
-                      placeholder="Select a segment..."
-                      onChange={(e) => setTo(e.target.value)}
-                      onFocus={() => setToFocused(true)}
-                      onBlur={() => setTimeout(() => setToFocused(false), 200)}
-                      className="w-full text-[14px] text-[#F0F0F0] bg-transparent border-none outline-none placeholder-[#666]"
-                    />
-                    {toFocused && filteredSegments.length > 0 && (
-                      <div className="absolute top-full left-0 mt-1 w-full bg-[#0a0a0a] border border-[rgba(176,199,217,0.145)] rounded-md shadow-lg z-50 py-1">
-                        {filteredSegments.map((seg) => (
-                          <button
-                            key={seg.id}
-                            type="button"
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              setSegmentId(seg.id);
-                              setTo(seg.name);
-                              autoSave({
-                                segmentId: seg.id,
-                              });
-                              setToFocused(false);
-                            }}
-                            className="w-full px-3 py-1.5 text-left text-[13px] text-[#A1A4A5] hover:bg-[rgba(176,199,217,0.08)] hover:text-[#F0F0F0] transition-colors"
-                          >
-                            {seg.name}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-              {!showWhen && (
-                <button
-                  type="button"
-                  onClick={() => setShowWhen(true)}
-                  className="text-[13px] text-[#A1A4A5] hover:text-[#F0F0F0] transition-colors shrink-0 ml-2"
-                >
-                  When
-                </button>
-              )}
-            </div>
-
-            {/* When (toggleable) */}
-            {showWhen && (
-              <div className="flex items-start border-b border-[rgba(176,199,217,0.08)] py-3">
-                <span className="text-[13px] text-[#A1A4A5] w-[100px] pt-1 shrink-0">
-                  When
-                </span>
-                <input
-                  type="datetime-local"
-                  value={scheduledAt}
-                  onChange={(e) => {
-                    setScheduledAt(e.target.value);
-                    autoSave({
-                      scheduledAt: e.target.value
-                        ? new Date(e.target.value).toISOString()
-                        : null,
-                    });
-                  }}
-                  className="flex-1 text-[14px] text-[#F0F0F0] bg-transparent border-none outline-none [color-scheme:dark]"
-                />
-              </div>
-            )}
-
-            {/* Subscribe to */}
-            <div
-              className="flex items-start border-b border-[rgba(176,199,217,0.08)] py-3 relative"
-              ref={topicDropdownRef}
-            >
-              <span className="text-[13px] text-[#A1A4A5] w-[100px] pt-1 shrink-0">
-                Subscribe to
-              </span>
-              <div className="flex-1 relative">
-                <button
-                  type="button"
-                  onClick={() => setTopicDropdownOpen(!topicDropdownOpen)}
-                  className="flex items-center gap-1 text-[14px] text-[#A1A4A5] hover:text-[#F0F0F0] transition-colors"
-                >
-                  <span>
-                    {selectedTopic ? selectedTopic.name : "Select a topic"}
-                  </span>
                   <svg
-                    aria-hidden="true"
-                    width="12"
-                    height="12"
+                    width="14"
+                    height="14"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
+                    aria-hidden="true"
                   >
-                    <path d="M6 9l6 6 6-6" />
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <path d="M3 9h18" />
                   </svg>
+                  Pick a template
                 </button>
-                {topicDropdownOpen && (
-                  <div className="absolute top-full left-0 mt-1 w-[240px] bg-[#0a0a0a] border border-[rgba(176,199,217,0.145)] rounded-md shadow-lg z-50 py-1">
-                    <button
-                      type="button"
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        setTopicId(null);
-                        autoSave({ topicId: null });
-                        setTopicDropdownOpen(false);
-                      }}
-                      className={`w-full px-3 py-1.5 text-left text-[13px] hover:bg-[rgba(176,199,217,0.08)] transition-colors ${!topicId ? "text-[#F0F0F0]" : "text-[#A1A4A5]"}`}
-                    >
-                      None
-                    </button>
-                    {topics.map((t) => (
-                      <button
-                        key={t.id}
-                        type="button"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          setTopicId(t.id);
-                          autoSave({
-                            topicId: t.id,
-                          });
-                          setTopicDropdownOpen(false);
-                        }}
-                        className={`w-full px-3 py-1.5 text-left text-[13px] hover:bg-[rgba(176,199,217,0.08)] transition-colors ${topicId === t.id ? "text-[#F0F0F0]" : "text-[#A1A4A5]"}`}
-                      >
-                        {t.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Subject */}
-            <div className="flex items-start border-b border-[rgba(176,199,217,0.08)] py-3">
-              <span className="text-[13px] text-[#A1A4A5] w-[100px] pt-1 shrink-0">
-                Subject
-              </span>
-              <div className="flex-1 flex items-center">
-                <input
-                  type="text"
-                  value={subject}
-                  placeholder="Subject"
-                  onChange={(e) => {
-                    setSubject(e.target.value);
-                    autoSave({
-                      subject: e.target.value,
-                    });
-                  }}
-                  className="flex-1 text-[14px] text-[#F0F0F0] bg-transparent border-none outline-none placeholder-[#666]"
-                />
-                {!showPreviewText && (
-                  <button
-                    type="button"
-                    onClick={() => setShowPreviewText(true)}
-                    className="text-[13px] text-[#A1A4A5] hover:text-[#F0F0F0] transition-colors shrink-0 ml-2"
+                <button
+                  type="button"
+                  className="flex items-center gap-1.5 text-[13px] text-[#A1A4A5] hover:text-[#F0F0F0] transition-colors"
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    aria-hidden="true"
                   >
-                    Preview text
-                  </button>
-                )}
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                  Upload HTML
+                </button>
               </div>
-            </div>
-
-            {/* Preview text (toggleable) */}
-            {showPreviewText && (
-              <div className="flex items-start border-b border-[rgba(176,199,217,0.08)] py-3">
-                <span className="text-[13px] text-[#A1A4A5] w-[100px] pt-1 shrink-0">
-                  Preview text
-                </span>
-                <input
-                  type="text"
-                  value={previewText}
-                  placeholder="Preview text (max 150 characters)"
-                  maxLength={150}
-                  onChange={(e) => {
-                    setPreviewText(e.target.value);
-                    autoSave({
-                      previewText: e.target.value,
-                    });
-                  }}
-                  className="flex-1 text-[14px] text-[#F0F0F0] bg-transparent border-none outline-none placeholder-[#666]"
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Block Editor */}
-          <div className="mt-8 relative">
-            <div
-              data-testid="block-editor"
-              className="min-h-[400px] border border-[rgba(176,199,217,0.08)] rounded-lg p-4 relative"
-              onKeyDown={handleEditorKeyDown}
-              // biome-ignore lint/a11y/noNoninteractiveTabindex: editor needs keyboard focus for slash commands
-              tabIndex={0}
-              aria-label="Content editor"
-            >
-              {blocks.length === 0 && !slashMenuOpen && (
-                <p className="text-[14px] text-[#666]">
-                  Press &apos;/&apos; for commands
-                </p>
-              )}
-
-              {/* Rendered blocks */}
-              {blocks.map((block) => (
-                <div
-                  key={block.id}
-                  data-testid={`block-${block.type}`}
-                  className="group relative mb-3"
-                >
-                  <div className="absolute -left-8 top-1 opacity-0 group-hover:opacity-100 flex gap-0.5">
-                    <button
-                      type="button"
-                      onClick={() => removeBlock(block.id)}
-                      className="p-0.5 text-[#666] hover:text-red-400 text-xs"
-                      title="Remove block"
-                    >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        aria-hidden="true"
-                      >
-                        <path d="M18 6L6 18M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
-                  <BlockRenderer
-                    block={block}
-                    onUpdate={(content) =>
-                      updateBlockContent(block.id, content)
-                    }
-                  />
-                </div>
-              ))}
-
-              {/* Slash command menu */}
-              {slashMenuOpen && (
-                <div
-                  ref={slashMenuRef}
-                  className="absolute left-4 z-50 w-[280px] max-h-[360px] overflow-y-auto bg-[#0a0a0a] border border-[rgba(176,199,217,0.145)] rounded-lg shadow-xl"
-                  style={{
-                    top:
-                      blocks.length > 0
-                        ? `${blocks.length * 48 + 16}px`
-                        : "16px",
-                  }}
-                >
-                  {SLASH_MENU_ITEMS.map((category) => (
-                    <div key={category.category}>
-                      <div className="px-3 py-1.5 text-[11px] font-semibold text-[#666] uppercase tracking-wider">
-                        {category.category}
-                      </div>
-                      {category.items.map((item) => (
-                        <button
-                          key={item.type}
-                          type="button"
-                          onClick={() => insertBlock(item.type)}
-                          className="w-full px-3 py-2 text-left text-[13px] text-[#A1A4A5] hover:bg-[rgba(176,199,217,0.08)] hover:text-[#F0F0F0] transition-colors flex items-center gap-2.5"
-                        >
-                          <span className="w-6 h-6 flex items-center justify-center rounded bg-[rgba(176,199,217,0.06)] text-[11px] font-mono shrink-0">
-                            {item.icon}
-                          </span>
-                          {item.label}
-                        </button>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Pick a template / Upload HTML */}
-            <div className="flex items-center gap-3 mt-3">
-              <button
-                type="button"
-                className="flex items-center gap-1.5 text-[13px] text-[#A1A4A5] hover:text-[#F0F0F0] transition-colors"
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  aria-hidden="true"
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="2" />
-                  <path d="M3 9h18" />
-                </svg>
-                Pick a template
-              </button>
-              <button
-                type="button"
-                className="flex items-center gap-1.5 text-[13px] text-[#A1A4A5] hover:text-[#F0F0F0] transition-colors"
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  aria-hidden="true"
-                >
-                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-                  <polyline points="17 8 12 3 7 8" />
-                  <line x1="12" y1="3" x2="12" y2="15" />
-                </svg>
-                Upload HTML
-              </button>
             </div>
           </div>
         </div>
+
+        {/* Right Sidebar */}
+        {sidebarOpen && (
+          <BroadcastEditorSidebar
+            style={broadcastStyle}
+            onChange={setBroadcastStyle}
+            onClose={() => setSidebarOpen(false)}
+          />
+        )}
       </div>
 
       {/* Bottom Toolbar */}
