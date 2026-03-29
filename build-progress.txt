@@ -915,3 +915,44 @@
 - src/app/(dashboard)/audience/topics/page.tsx — Updated to use TopicsList component
 - tests/topics.test.ts — 11 unit tests for component and API
 - tests/e2e/topics.spec.ts — 3 E2E tests for topics page
+
+## Iteration 29 — feature-008: Broadcasts List Page (2026-03-29)
+
+### What was built
+- BroadcastsList client component (`src/components/broadcasts-list.tsx`) with:
+  - Data table with checkbox column, Name (link to /broadcasts/:id/editor), Status (capitalized), Created (relative time)
+  - Filter bar: Search input with debounce, Status dropdown (All Statuses + Draft/Scheduled/Queued/Sent/Failed), Audiences combobox (All Audiences + segment names from API), Export button
+  - "Create email" button that creates a new broadcast via POST /api/broadcasts and navigates to editor
+  - Row actions dropdown: Edit, Duplicate, Clone as template, Remove (with separator before Remove)
+  - Pagination with page info and 40/80/120 items per page selector
+  - Checkbox selection with select-all toggle
+  - Empty state "No broadcasts" when no data
+- API routes for broadcasts CRUD:
+  - GET /api/broadcasts — list with search, status filter, segmentId filter, pagination
+  - POST /api/broadcasts — create new broadcast
+  - GET /api/broadcasts/:id — get single broadcast
+  - PATCH /api/broadcasts/:id — update broadcast
+  - DELETE /api/broadcasts/:id — delete broadcast
+- Updated /broadcasts page to render BroadcastsList component
+- Created placeholder /broadcasts/:id/editor page for navigation
+
+### Test results
+- 12 new unit tests passing (rows with columns, column headers, status filter with 5+All statuses, empty state, create email button, name links, search input, checkboxes, row actions dropdown, create broadcast POST, audiences filter, pagination)
+- 3 E2E tests written (navigate to editor, filter by status, create email)
+- 344 total unit tests passing (332 previous + 12 new), no regressions
+- make check: typecheck + lint passing
+
+### Decisions
+- Used role="menu" with role="menuitem" for dropdown menus to satisfy Biome a11y linting
+- Followed SegmentsList pattern for component structure (fetch, filter, paginate)
+- Client-side dropdown filters using state + API query params for server-side filtering
+- Row actions: Edit navigates, Duplicate creates copy via API, Remove deletes via API
+
+### Files changed
+- src/components/broadcasts-list.tsx — BroadcastsList component with table, filters, actions
+- src/app/(dashboard)/broadcasts/page.tsx — Updated to render BroadcastsList
+- src/app/(dashboard)/broadcasts/[id]/editor/page.tsx — Placeholder editor page
+- src/app/api/broadcasts/route.ts — GET (list) + POST (create) API routes
+- src/app/api/broadcasts/[id]/route.ts — GET + PATCH + DELETE API routes
+- tests/broadcasts-list.test.ts — 12 unit tests
+- tests/e2e/broadcasts-list.spec.ts — 3 E2E tests
