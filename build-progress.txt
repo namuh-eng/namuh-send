@@ -144,3 +144,33 @@
 - src/app/(dashboard)/settings/page.tsx — Settings stub page
 - tests/sidebar.test.ts — 5 unit tests for sidebar nav config
 - tests/e2e/smoke.spec.ts — 5 E2E smoke tests for navigation
+
+## Iteration 6 — design-001: Shared Data Table Component (2026-03-29)
+
+### What was built
+- Reusable `DataTable<T>` generic component (`src/components/data-table.tsx`)
+- Column definitions with custom `render` functions for flexible cell content
+- Optional checkbox column with select-all/deselect-all in header
+- Individual row checkbox toggle
+- Row click handler (`onRowClick`) with keyboard accessibility (Enter/Space)
+- Three-dot "More actions" button per row with dropdown menu
+- Action items support `destructive` styling (red text) and `separator` (border-top divider)
+- Click-outside-to-close for action dropdown menus
+- Empty state message when no rows
+- Dark theme styling matching Resend: #A1A4A5 headers (12px), #F0F0F0 cell text (14px), rgba(176,199,217,0.145) borders
+- Hover state on rows: bg-[rgba(24,25,28,0.5)]
+
+### Test results
+- 11 new unit tests passing (render headers/rows, custom render, empty state, checkbox select all, individual checkbox, onRowClick, actions menu button, action menu items, no checkbox when disabled, column count, row count)
+- 84 total tests passing (22 schema + 16 SES + 15 Cloudflare + 15 S3 + 5 sidebar + 11 data-table), no regressions
+- make check: typecheck + lint passing
+
+### Decisions
+- Used generic `DataTable<T>` for type-safe reuse across all list pages (emails, domains, api-keys, etc.)
+- Exported `Column<T>` and `RowAction<T>` interfaces for consuming components
+- Added `onKeyDown` handler on clickable cells for Biome a11y compliance
+- Used `.tsx` for test file to enable JSX with proper generic type inference
+
+### Files changed
+- src/components/data-table.tsx — Generic DataTable component with all features
+- tests/data-table.test.tsx — 11 unit tests for DataTable component
