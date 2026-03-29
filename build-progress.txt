@@ -204,3 +204,39 @@
 - src/components/combobox-filter.tsx — Searchable combobox filter
 - src/components/export-button.tsx — Export icon button
 - tests/filter-bar.test.tsx — 20 unit tests for all filter components
+
+## Iteration 8 — design-003: Shared UI Primitives (2026-03-29)
+
+### What was built
+- Pagination component (`src/components/pagination.tsx`) — page info display, items per page selector (40/80/120) with dropdown, prev/next navigation buttons with disabled states
+- Modal component (`src/components/modal.tsx`) — centered dialog with title, close button (X), Cancel button, optional action button, Escape key to close, dark overlay
+- Toast component + ToastProvider (`src/components/toast.tsx`) — success/error toast notifications with icons, auto-dismiss after 3s, context-based hook (useToast) for imperative usage
+- StatusBadge component (`src/components/status-badge.tsx`) — text-based status indicators with 5 variants: success (green), error (red), warning (yellow), info (blue), default (gray)
+- CopyToClipboard component (`src/components/copy-to-clipboard.tsx`) — displays value with copy button, shows checkmark confirmation state for 1.5s after copying
+- Tabs component (`src/components/tabs.tsx`) — tab bar with data-state active/inactive attributes, bottom border indicator on active tab
+- Toggle component (`src/components/toggle.tsx`) — binary switch control with label, data-state checked/unchecked, accessible role="switch"
+- EmptyState component (`src/components/empty-state.tsx`) — centered empty state with title, description, optional icon and action button
+- All components use consistent dark theme styling matching Resend's design system
+
+### Test results
+- 30 new unit tests passing (Pagination: 5, Modal: 5, Toast: 3, StatusBadge: 5, CopyToClipboard: 3, Tabs: 4, Toggle: 3, EmptyState: 2)
+- 134 total tests passing (22 schema + 16 SES + 15 Cloudflare + 15 S3 + 5 sidebar + 11 data-table + 20 filter-bar + 30 ui-primitives), no regressions
+- make check: typecheck + lint passing
+
+### Decisions
+- Used custom modal instead of Radix Dialog to match exact Resend styling and keep test assertions simple
+- Toggle uses `role="switch"` with `data-state` attribute instead of Radix Switch for consistency
+- Tabs use `data-state="active"/"inactive"` for E2E testability matching Resend's pattern
+- Toast uses context provider pattern (ToastProvider + useToast hook) for app-wide imperative usage
+- Added `afterEach(cleanup)` to tests since vitest doesn't auto-cleanup @testing-library renders
+
+### Files changed
+- src/components/pagination.tsx — Pagination with page size selector and navigation
+- src/components/modal.tsx — Modal dialog with overlay, close, cancel, action
+- src/components/toast.tsx — Toast notifications with provider and hook
+- src/components/status-badge.tsx — Status badge with 5 color variants
+- src/components/copy-to-clipboard.tsx — Copy to clipboard with confirmation state
+- src/components/tabs.tsx — Tab bar with active/inactive states
+- src/components/toggle.tsx — Toggle switch with accessible role
+- src/components/empty-state.tsx — Empty state with title, description, action
+- tests/ui-primitives.test.tsx — 30 unit tests for all 8 UI primitives
