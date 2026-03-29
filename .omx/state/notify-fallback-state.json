@@ -12,9 +12,9 @@
   "dispatch_drain": {
     "enabled": true,
     "max_per_tick": 5,
-    "run_count": 1832,
+    "run_count": 2739,
     "leader_only": true,
-    "last_tick_at": "2026-03-29T08:19:21.912Z",
+    "last_tick_at": "2026-03-29T08:24:28.838Z",
     "last_result": {
       "processed": 0,
       "skipped": 0,
@@ -27,16 +27,16 @@
     "leader_only": true,
     "stale_threshold_ms": 180000,
     "precomputed_leader_stale": true,
-    "last_tick_at": "2026-03-29T08:19:21.913Z",
+    "last_tick_at": "2026-03-29T08:24:28.838Z",
     "last_error": null,
-    "run_count": 1832
+    "run_count": 2739
   },
   "ralph_continue_steer": {
     "enabled": true,
     "cadence_ms": 60000,
     "message": "Ralph loop active continue",
     "active": false,
-    "last_state_check_at": "2026-03-29T08:19:22.074Z",
+    "last_state_check_at": "2026-03-29T08:24:28.922Z",
     "last_sent_at": "",
     "cooldown_anchor_at": "",
     "last_reason": "cleared",
@@ -52,7 +52,7 @@
   "fallback_auto_nudge": {
     "enabled": true,
     "stall_ms": 5000,
-    "last_tick_at": "2026-03-29T08:19:22.074Z",
+    "last_tick_at": "2026-03-29T08:24:28.922Z",
     "last_turn_at": "2026-03-29T08:09:07.091Z",
     "last_turn_count": 0,
     "last_message": "",
