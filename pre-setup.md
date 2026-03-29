@@ -3,7 +3,7 @@
 Everything listed here is already installed and configured. Do NOT reinstall, reconfigure, or overwrite these.
 
 ## Tooling
-- **Next.js 14** — `next.config.js` (standalone output for Docker)
+- **Next.js 16** — `next.config.js` (standalone output for Docker, Turbopack)
 - **TypeScript** — `tsconfig.json` (strict mode, `@/` path aliases)
 - **Tailwind CSS** — `tailwind.config.ts` + `postcss.config.js` (dark mode, src paths)
 - **Biome** — `biome.json` (lint + format, replaces ESLint/Prettier)
