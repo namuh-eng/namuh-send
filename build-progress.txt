@@ -174,3 +174,33 @@
 ### Files changed
 - src/components/data-table.tsx — Generic DataTable component with all features
 - tests/data-table.test.tsx — 11 unit tests for DataTable component
+
+## Iteration 7 — design-002: Shared Filter Bar Components (2026-03-29)
+
+### What was built
+- SearchInput component (`src/components/search-input.tsx`) — text input with magnifying glass icon, placeholder "Search...", dark theme styling with 12px border-radius
+- DateRangePicker component (`src/components/date-range-picker.tsx`) — button showing selected range, popover with 6 presets (Today, Yesterday, Last 3/7/15/30 days) + calendar month view with month navigation, selected range highlighting, checkmark on active preset
+- DropdownFilter component (`src/components/dropdown-filter.tsx`) — button with dropdown popover, colored dot indicators per option, checkmark on selected option, click-outside-to-close
+- ComboboxFilter component (`src/components/combobox-filter.tsx`) — searchable dropdown with text filter, filters options as you type, click-outside-to-close
+- ExportButton component (`src/components/export-button.tsx`) — icon button with download arrow SVG
+- All components use consistent dark theme: rgba(24,25,28,0.88) bg, rgba(176,199,217,0.145) border, 12px border-radius
+
+### Test results
+- 20 new unit tests passing (SearchInput: 3, DateRangePicker: 6, DropdownFilter: 5, ComboboxFilter: 4, ExportButton: 2)
+- 104 total tests passing (22 schema + 16 SES + 15 Cloudflare + 15 S3 + 5 sidebar + 11 data-table + 20 filter-bar), no regressions
+- make check: typecheck + lint passing
+
+### Decisions
+- Each filter component is standalone with controlled value/onChange props for flexible composition
+- DateRangePicker uses preset strings as values (not Date objects) for simplicity — consuming pages can convert to date ranges
+- Used stable keys (not array indices) for calendar grid to satisfy Biome lint rules
+- Click-outside-to-close pattern shared across dropdown, combobox, and date range picker
+- ComboboxFilter filters options case-insensitively on the label field
+
+### Files changed
+- src/components/search-input.tsx — Search input with icon
+- src/components/date-range-picker.tsx — Date range picker with presets + calendar
+- src/components/dropdown-filter.tsx — Dropdown filter with colored dots
+- src/components/combobox-filter.tsx — Searchable combobox filter
+- src/components/export-button.tsx — Export icon button
+- tests/filter-bar.test.tsx — 20 unit tests for all filter components
