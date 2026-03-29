@@ -58,6 +58,7 @@ for ((i=1; i<=$ITERATIONS; i++)); do
 "$(cat qa-prompt.md)
 
 Read these files before starting:
+@pre-setup.md
 @build-spec.md
 @prd.json
 @qa-progress.txt
