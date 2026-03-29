@@ -681,6 +681,67 @@ contact.created, contact.updated, contact.deleted
 | Error section | Not present | Error title + description + "Help me fix" |
 | Request highlighting | None | Error-causing values highlighted |
 
+### 6.19 API Keys — List Page (`/api-keys`)
+
+**Layout**: Page title "API Keys" + "Create API Key" button + API drawer button → filter bar → data table → pagination
+
+**Filter Bar** (left to right):
+1. **Search** (Shadow DOM input, placeholder "Search...")
+2. **Permissions filter** (combobox, default "All Permissions") — 3 options:
+   - All Permissions, Full access, Sending access
+3. **Export button** (right side, icon button)
+
+**Data Table**:
+- Columns: Name, Token, Permission, Last Used, Created
+- Checkbox column for bulk selection (header + per row)
+- **Name** column: clickable link to `/api-keys/:id` (detail page)
+- **Token** column: truncated token with tooltip (e.g., "re_jQPfsTWu...") — button shows full token on click/hover
+- **Permission** column: text (e.g., "Full access")
+- **Last Used** column: relative time as link to the log entry (e.g., links to `/logs/:id`)
+- **Created** column: relative time with tooltip for exact timestamp
+- **Row actions**: three-dot "More actions" button → dropdown (actions not captured — likely: Edit API key, Delete API key based on detail page actions)
+
+**Create API Key** (button → modal "Add API Key"):
+- **Name**: text input (placeholder "Your API Key name", required)
+- **Permission**: combobox with info tooltip — 2 options:
+  - **Full access** (`full_access`) — default
+  - **Sending access** (`sending_access`)
+- **Domain**: combobox (default "All Domains") — **disabled when Full access selected**, enabled for Sending access
+  - Options: All Domains + list of verified domains (with region flag icon)
+- **Add** button (disabled until name filled) + Cancel button (Esc shortcut)
+
+**Pagination**: Page indicator + items per page selector (40/80/120)
+
+### 6.20 API Key Detail Page (`/api-keys/:id`)
+
+**Layout**: "API Key" breadcrumb label + key name as h1 heading + API drawer button + More actions button
+
+**Metadata** (key-value pairs):
+- **Permission**: text (e.g., "Full access")
+- **Domain**: text (e.g., "All domains")
+- **Total uses**: count as link to logs filtered by this API key (e.g., links to `/logs?api_key=:id`)
+- **Token**: truncated token with tooltip/copy (e.g., "re_jQPfsTWu...")
+- **Last used**: relative timestamp as link to the last log entry
+- **Created**: relative timestamp
+- **Creator**: email address
+
+**More Actions**:
+- Edit API key → opens Edit modal (same fields as Create: Name, Permission, Domain + Save button)
+- Go to docs
+- *(separator)*
+- Delete API key
+
+**Edit API Key** (modal):
+- Same fields as Create modal: Name (pre-filled), Permission, Domain
+- **Save** button instead of Add
+- Cancel button (Esc shortcut)
+
+**Key observations**:
+- No content tabs (unlike email/domain detail pages) — just metadata
+- Token is never fully shown — always truncated with "..."
+- "Total uses" and "Last used" both link to the Logs page, providing cross-resource navigation
+- API key detail is the only resource with a direct "Edit" action in More actions menu (other resources use separate edit pages/modals)
+
 ## 7. Design System — PARTIAL (needs more deep dives)
 
 ### Layout
@@ -727,6 +788,7 @@ contact.created, contact.updated, contact.deleted
 - `/domains/:id` — Domain detail (DNS records, verification)
 - `/templates/:id` — Template editor
 - `/logs/:id` — Log detail (API request/response, error explanation)
+- `/api-keys/:id` — API key detail (permission, domain, usage stats)
 
 ## 8. Build Order
 

@@ -307,4 +307,42 @@
 - screenshots/inspect/ — logs-list.jpg, logs-status-filter.jpg, log-detail.jpg, log-detail-error.jpg
 
 ### Next:
-- Iteration 8: Deep dive — API Keys page
+- Iteration 9: Deep dive — Webhooks page
+
+---
+
+## Iteration 8: API Keys Page Deep Dive — COMPLETE (2026-03-29)
+
+### What was done:
+- Navigated to API Keys list page, inspected all interactive elements
+- Opened and inspected Permissions filter: 3 options (All Permissions, Full access, Sending access)
+- Opened "Create API Key" modal and inspected all fields:
+  - Name (text input, placeholder "Your API Key name")
+  - Permission (combobox: Full access / Sending access)
+  - Domain (combobox: All Domains + verified domains with region flags)
+- Tested Permission → Domain interaction: Domain disabled for Full access, enabled for Sending access
+- Navigated to API Key Detail page (/api-keys/:id)
+- Inspected detail metadata: Permission, Domain, Total uses (link to logs), Token (truncated), Last used (link to log), Created, Creator
+- Opened More actions: Edit API key, Go to docs, Delete API key
+- Inspected Edit API Key modal: same fields as Create (Name pre-filled, Permission, Domain) + Save button
+- Took screenshots: api-keys-list.jpg, api-keys-create-modal.jpg, api-key-detail.jpg, api-key-edit-modal.jpg
+
+### Key findings:
+- API Keys list has 5 columns: Name, Token, Permission, Last Used, Created — with checkboxes
+- 2 permission types: full_access (all domains, all API operations), sending_access (scoped to specific domain, email sending only)
+- Domain scoping only available for Sending access — disabled/locked for Full access
+- Token format: re_ prefix followed by truncated alphanumeric string (never fully visible after creation)
+- Last Used column links directly to the specific log entry (/logs/:id)
+- Total uses on detail page links to logs filtered by API key
+- Detail page has Edit API key modal (inline editing, not separate page)
+- Row actions on list page difficult to capture (closes instantly) — likely Edit + Delete based on detail page actions
+- No content tabs on detail page (unlike email/domain) — just metadata key-value pairs
+- Creator email shown on detail page (not on list page)
+
+### Files created/updated:
+- build-spec.md — Added sections 6.19 (API Keys List) and 6.20 (API Key Detail), updated site map detail pages
+- prd.json — Added 3 feature entries (feature-030 through feature-032)
+- screenshots/inspect/ — api-keys-list.jpg, api-keys-create-modal.jpg, api-key-detail.jpg, api-key-edit-modal.jpg
+
+### Next:
+- Iteration 9: Deep dive — Webhooks page

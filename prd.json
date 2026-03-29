@@ -1391,5 +1391,144 @@
         }
       ]
     }
+  },
+  {
+    "id": "feature-030",
+    "category": "crud",
+    "description": "API Keys list page with data table, search, permissions filter, and create modal",
+    "page": "API Keys",
+    "ui_details": "Page title 'API Keys', 'Create API Key' button, API drawer button. Filter bar: Search (Shadow DOM), Permissions combobox (All Permissions, Full access, Sending access), Export button. Data table columns: Name (link to detail), Token (truncated re_xxx...), Permission, Last Used (link to log entry), Created. Checkbox column for bulk selection. Row actions three-dot menu.",
+    "behavior": "Search filters by name/token. Permissions filter filters by full_access or sending_access. Name column links to /api-keys/:id. Last Used column links to /logs/:id. Token shows truncated value with tooltip. Pagination 40/80/120 items per page.",
+    "data_model": "API Key: id (UUID), name (string), token (string, prefix re_), permission (full_access | sending_access), domain_id (UUID, nullable), last_used_at (timestamp), created_at (timestamp), creator_email (string)",
+    "priority": 9,
+    "core": true,
+    "passes": false,
+    "tests": {
+      "unit": [
+        {
+          "name": "renders API Keys list with correct columns",
+          "description": "Table renders with Name, Token, Permission, Last Used, Created columns",
+          "input": "Navigate to /api-keys",
+          "expected_output": "All 5 columns visible with correct headers"
+        },
+        {
+          "name": "permissions filter has correct options",
+          "description": "Filter dropdown shows All Permissions, Full access, Sending access",
+          "input": "Click permissions filter",
+          "expected_output": "3 options displayed"
+        }
+      ],
+      "e2e": [
+        {
+          "name": "navigate to API key detail from list",
+          "steps": [
+            "Navigate to /api-keys",
+            "Click on API key name link in first row",
+            "Verify URL changes to /api-keys/:id",
+            "Verify detail page loads with key metadata"
+          ],
+          "expected": "API key detail page shows Permission, Domain, Total uses, Token, Last used, Created, Creator"
+        }
+      ],
+      "edge_cases": [
+        {
+          "name": "empty API keys list",
+          "steps": ["Navigate to /api-keys with no keys created"],
+          "expected": "Empty state message displayed"
+        }
+      ]
+    }
+  },
+  {
+    "id": "feature-031",
+    "category": "crud",
+    "description": "Create API Key modal with name, permission, and domain fields",
+    "page": "API Keys",
+    "ui_details": "Modal titled 'Add API Key'. Fields: Name (text input, placeholder 'Your API Key name'), Permission (combobox: Full access default, Sending access), Domain (combobox: All Domains + verified domains with region flag). Add button (disabled until name filled) + Cancel (Esc). Domain field disabled when Full access selected, enabled for Sending access.",
+    "behavior": "Clicking 'Create API Key' opens modal. Selecting 'Sending access' enables Domain combobox showing verified domains. Selecting 'Full access' disables Domain field and resets to 'All Domains'. Submitting creates new API key and shows the full token ONCE (never shown again). Add button disabled until name is entered.",
+    "data_model": "Create API Key: name (string, required), permission (full_access | sending_access), domain_id (UUID, optional — only for sending_access)",
+    "priority": 9,
+    "core": true,
+    "passes": false,
+    "tests": {
+      "unit": [
+        {
+          "name": "domain field disabled for full access",
+          "description": "Domain combobox is disabled when Full access permission is selected",
+          "input": "Select Full access permission",
+          "expected_output": "Domain field shows 'All Domains' and is disabled"
+        },
+        {
+          "name": "domain field enabled for sending access",
+          "description": "Domain combobox becomes active when Sending access is selected",
+          "input": "Select Sending access permission",
+          "expected_output": "Domain field is enabled and shows verified domains"
+        }
+      ],
+      "e2e": [
+        {
+          "name": "create API key with full access",
+          "steps": [
+            "Navigate to /api-keys",
+            "Click 'Create API Key' button",
+            "Enter 'Test Key' in Name field",
+            "Verify Permission defaults to 'Full access'",
+            "Click Add button",
+            "Verify new key appears in list"
+          ],
+          "expected": "New API key created with Full access permission, token shown once"
+        }
+      ],
+      "edge_cases": [
+        {
+          "name": "submit without name",
+          "steps": ["Open Create API Key modal", "Click Add without entering name"],
+          "expected": "Add button remains disabled, validation prevents submission"
+        }
+      ]
+    }
+  },
+  {
+    "id": "feature-032",
+    "category": "ui",
+    "description": "API Key detail page with metadata, edit modal, and delete action",
+    "page": "API Keys",
+    "ui_details": "'API Key' breadcrumb + key name as h1. Metadata: Permission, Domain, Total uses (link to filtered logs), Token (truncated), Last used (link to log entry), Created, Creator. API drawer button + More actions (Edit API key, Go to docs, Delete API key). Edit modal: same fields as Create (Name pre-filled, Permission, Domain) + Save button.",
+    "behavior": "Total uses links to /logs?api_key=:id. Last used links to specific /logs/:id. Edit API key opens modal with current values pre-filled. Save updates the key. Delete removes the key with confirmation. Token always truncated, never fully shown after creation.",
+    "data_model": "API Key detail: id, name, token (truncated), permission, domain, total_uses (count), last_used_at, created_at, creator_email",
+    "priority": 9,
+    "core": true,
+    "passes": false,
+    "tests": {
+      "unit": [
+        {
+          "name": "renders API key detail with all metadata fields",
+          "description": "Detail page shows Permission, Domain, Total uses, Token, Last used, Created, Creator",
+          "input": "Navigate to /api-keys/:id",
+          "expected_output": "All 7 metadata fields rendered with correct values"
+        }
+      ],
+      "e2e": [
+        {
+          "name": "edit API key name",
+          "steps": [
+            "Navigate to /api-keys/:id",
+            "Click More actions button",
+            "Click 'Edit API key'",
+            "Change name to 'Updated Key'",
+            "Click Save",
+            "Verify name updated in heading"
+          ],
+          "expected": "API key name updated to 'Updated Key' in h1 heading and metadata"
+        }
+      ],
+      "edge_cases": [
+        {
+          "name": "total uses links to filtered logs",
+          "steps": ["Navigate to /api-keys/:id", "Click Total uses link"],
+          "expected": "Navigates to /logs page filtered by this API key ID"
+        }
+      ]
+    }
   }
 ]
