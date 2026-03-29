@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.next/
+.env
+.DS_Store
+.omc/
+
+# Runtime files
+*.log
+.ralph-watchdog.lock
+.ever-session-id
+.inspect-complete
+qa-report.json
