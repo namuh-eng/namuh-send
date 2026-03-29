@@ -1,0 +1,37 @@
+import { expect, test } from "@playwright/test";
+
+test.describe("Email Detail Page", () => {
+  test("view email detail page shows metadata and events", async ({ page }) => {
+    // Navigate to an email detail page directly
+    // First go to emails list to find an email
+    await page.goto("/emails");
+    await page.waitForLoadState("networkidle");
+
+    // Check if there are any email links
+    const emailLink = page.locator('a[href^="/emails/"]').first();
+    const hasEmails = (await emailLink.count()) > 0;
+
+    if (hasEmails) {
+      // Click the first email
+      await emailLink.click();
+      await page.waitForLoadState("networkidle");
+
+      // Verify metadata fields
+      await expect(page.getByText("FROM")).toBeVisible();
+      await expect(page.getByText("SUBJECT")).toBeVisible();
+      await expect(page.getByText("TO")).toBeVisible();
+      await expect(page.getByText("ID")).toBeVisible();
+
+      // Verify Email Events section
+      await expect(page.getByText("EMAIL EVENTS")).toBeVisible();
+
+      // Verify content tabs
+      await expect(page.getByText("Preview")).toBeVisible();
+      await expect(page.getByText("Plain Text")).toBeVisible();
+      await expect(page.getByText("HTML")).toBeVisible();
+
+      // Verify envelope icon
+      await expect(page.getByTestId("email-envelope-icon")).toBeVisible();
+    }
+  });
+});

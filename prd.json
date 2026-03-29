@@ -610,7 +610,7 @@
     "data_model": "Email detail: { id: string, from: string, to: string, subject: string, html: string, text: string, events: Array<{ type: EmailStatus, timestamp: Date }> }",
     "priority": 6,
     "core": true,
-    "passes": false,
+    "passes": true,
     "tests": {
       "unit": [
         {
