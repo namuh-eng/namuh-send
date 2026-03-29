@@ -30,9 +30,9 @@ This is your **source of truth** — the clone should match the original's behav
 1. Read `qa-progress.txt` to see what has been tested.
 2. Read `prd.json` to find the next feature to test (first entry you haven't QA'd yet).
 
-### Step 1: Automated Regression (fast — do this first)
-3. Run `make test-e2e` to execute Playwright E2E tests. If any fail, investigate and fix before manual testing.
-4. Run `make test` to verify unit tests still pass.
+### Step 1: Check existing tests pass
+3. Run `make test` to verify unit tests still pass. If any fail, fix before proceeding.
+4. Note: `make test-e2e` (full Playwright regression) is run ONCE at the start of the QA phase by the shell script. You don't need to run it per feature — just focus on manual verification.
 
 ### Step 2: Manual Verification (Ever CLI)
 5. Start the dev server if not running (`npm run dev`).
@@ -88,7 +88,7 @@ This is your **source of truth** — the clone should match the original's behav
     ```
 11. If bugs are found:
     - Fix ALL bugs for this feature before committing (batch fixes, don't commit per bug)
-    - After fixing all bugs, run `make check && make test && make test-e2e` once
+    - After fixing all bugs, run `make check && make test` once
     - If any test fails, fix and re-run until all green
     - Commit all fixes together: `git commit -m "QA fix: <feature> — fixed N bugs: <brief list>"`
 12. Update `qa-progress.txt` with what you tested and results.
@@ -141,7 +141,7 @@ This is your **source of truth** — the clone should match the original's behav
 ## Rules
 - **HARD STOP: Test exactly ONE feature per invocation.** Commit, push, output promise, stop.
 - Be skeptical. Assume things are broken until proven otherwise.
-- Fix ALL bugs for the feature, then run `make check && make test && make test-e2e` once before committing.
+- Fix ALL bugs for the feature, then run `make check && make test` before committing.
 - **NEVER weaken or delete tests to make them pass.** If a test fails, fix the code, not the test. Never replace meaningful assertions with trivial ones. If a test is genuinely wrong, rewrite it to test the correct behavior — don't remove it.
 - Output `<promise>NEXT</promise>` after committing if more features remain.
 - Output `<promise>QA_COMPLETE</promise>` only if ALL features are QA tested and all bugs fixed.
