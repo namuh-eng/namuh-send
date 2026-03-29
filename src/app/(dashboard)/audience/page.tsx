@@ -1,7 +1,10 @@
-export default function AudiencePage() {
+import { EmptyState } from "@/components/empty-state";
+
+export default function ContactsPage() {
   return (
-    <div>
-      <h1 className="text-2xl font-semibold text-[#F0F0F0]">Audience</h1>
-    </div>
+    <EmptyState
+      title="No contacts"
+      description="Add contacts to start sending emails to your audience."
+    />
   );
 }

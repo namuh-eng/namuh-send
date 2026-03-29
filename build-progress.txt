@@ -686,3 +686,37 @@
 - src/components/emails-header.tsx — Integrated ApiDrawerButton + ApiCodeDrawer
 - tests/api-code-drawer.test.ts — 9 unit tests for code examples data
 - tests/e2e/api-code-drawer.spec.ts — 2 E2E tests for drawer open/close behavior
+
+## Iteration 22 — feature-016: Audience Page Layout (2026-03-29)
+
+### What was built
+- AudienceLayout client component (`src/components/audience-layout.tsx`) with:
+  - "Audience" h1 page title
+  - 4-tab navigation bar: Contacts (/audience), Properties (/audience/properties), Segments (/audience/segments), Topics (/audience/topics)
+  - URL-based tab navigation using Next.js Link with data-state active/inactive attributes
+  - Summary stats row: ALL CONTACTS, SUBSCRIBERS, UNSUBSCRIBERS counts from DB, METRICS label
+  - "+ Add contacts" dropdown button with "Add manually" and "Import CSV" options
+  - Click-outside-to-close for dropdown
+- Audience layout page (`src/app/(dashboard)/audience/layout.tsx`) — server component fetching contact stats from Postgres
+- Sub-pages for each tab: properties, segments, topics (empty states)
+- Updated audience/page.tsx to show contacts empty state
+
+### Test results
+- 8 new unit tests passing (tab rendering, active states, stats, dropdown, hrefs)
+- 278 total tests passing, no regressions
+- make check: typecheck + lint passing
+
+### Decisions
+- Used Next.js layout.tsx for shared audience shell so tabs persist across sub-routes
+- Stats fetched server-side with SQL COUNT + FILTER for subscribed/unsubscribed
+- Tab sub-pages use EmptyState component as placeholders for future feature implementation
+
+### Files changed
+- src/components/audience-layout.tsx — AudienceLayout client component with tabs, stats, dropdown
+- src/app/(dashboard)/audience/layout.tsx — Server layout fetching contact stats
+- src/app/(dashboard)/audience/page.tsx — Updated to contacts empty state
+- src/app/(dashboard)/audience/properties/page.tsx — Properties tab page
+- src/app/(dashboard)/audience/segments/page.tsx — Segments tab page
+- src/app/(dashboard)/audience/topics/page.tsx — Topics tab page
+- tests/audience-layout.test.tsx — 8 unit tests for audience layout
+- tests/e2e/audience-layout.spec.ts — 5 E2E tests for tab navigation and dropdown
