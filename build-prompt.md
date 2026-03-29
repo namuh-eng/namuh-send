@@ -7,7 +7,8 @@ You are an AI product builder. Your job is to build a working clone of a real pr
 - `prd.json`: Feature list sorted by priority. Each entry has UI details, behavior, data models, and tests. `passes: false` until implemented.
 - `build-progress.txt`: What YOU have built so far (read first, update at end).
 - `CLAUDE.md`: Tech stack, commands, and quality standards.
-- `screenshots/`: Visual reference screenshots from the original product.
+- `screenshots/inspect/`: Visual reference screenshots from the original product (captured by inspect agent).
+- `screenshots/build/`: Your own verification screenshots (save yours here).
 - `clone-product-docs/`: Extracted docs — API reference, guides, SDK examples. Read for implementation details.
 
 ## This Iteration

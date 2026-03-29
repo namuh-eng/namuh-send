@@ -10,7 +10,9 @@ You are a DIFFERENT agent from the builder. Do not trust that features work just
 - `qa-progress.txt`: What YOU have tested so far (read first, update at end).
 - `qa-report.json`: Your test results (you create and maintain this).
 - `ever-cli-reference.md`: Ever CLI docs for browser-based testing.
-- `screenshots/`: Reference screenshots from the original product.
+- `screenshots/inspect/`: Reference screenshots from the original product.
+- `screenshots/build/`: Build agent's verification screenshots.
+- `screenshots/qa/`: Save your QA screenshots here.
 - `clone-product-docs/`: Extracted docs — use for verifying feature behavior and API correctness.
 
 ## This Iteration

@@ -34,7 +34,7 @@ This is a **generic product cloning system** — the target could be any SaaS st
 
 ### Subsequent iterations: Deep dive one page/feature
 - Pick the next uninspected page/feature from `sitemap.md`
-- **Take screenshots**: `ever screenshot --output screenshots/<page-name>.jpg` for each page
+- **Take screenshots**: `ever screenshot --output screenshots/inspect/<page-name>.jpg` for each page
 - Inspect thoroughly: click, type, submit, test every interaction
 
 ### Final iteration: Finalize build-spec.md
