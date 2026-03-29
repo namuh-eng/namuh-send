@@ -33,4 +33,40 @@ test.describe("Broadcast Editor", () => {
     // Cleanup
     await page.request.delete(`/api/broadcasts/${broadcast.id}`);
   });
+
+  test("insert heading block via slash command", async ({ page }) => {
+    // Create a broadcast
+    const res = await page.request.post("/api/broadcasts", {
+      data: { name: "Slash Test" },
+    });
+    const broadcast = await res.json();
+
+    // Navigate to editor
+    await page.goto(`/broadcasts/${broadcast.id}/editor`);
+
+    // Wait for block editor to load
+    await page.waitForSelector('[data-testid="block-editor"]');
+
+    // Click the editor area and press /
+    const editor = page.locator('[data-testid="block-editor"]');
+    await editor.click();
+    await editor.press("/");
+
+    // Wait for slash menu to appear with Heading option
+    await expect(page.getByText("Heading")).toBeVisible();
+
+    // Click Heading
+    await page.getByText("Heading").click();
+
+    // Verify heading block appeared
+    await expect(page.locator('[data-testid="block-heading"]')).toBeVisible();
+
+    // Type in the heading
+    const headingInput = page.locator('[data-testid="block-heading"] input');
+    await headingInput.fill("Hello World");
+    await expect(headingInput).toHaveValue("Hello World");
+
+    // Cleanup
+    await page.request.delete(`/api/broadcasts/${broadcast.id}`);
+  });
 });

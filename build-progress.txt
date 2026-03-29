@@ -991,3 +991,33 @@
 - src/app/(dashboard)/broadcasts/[id]/editor/page.tsx — Updated to use BroadcastEditor component
 - tests/broadcast-editor.test.tsx — 8 unit tests for broadcast editor
 - tests/e2e/broadcast-editor.spec.ts — E2E test for inline title editing
+
+## Iteration 31 — feature-010: Broadcast Editor Block-Based Content Editor (2026-03-29)
+
+### What was built
+- Block-based content editor with '/' slash command menu in broadcast editor
+- Slash menu with 4 categories: Text (Text, Title, Subtitle, Heading, Bullet list, Numbered list, Quote, Code block), Media (Image, YouTube, X/Twitter), Layout (Button, Divider, Section, Columns, Social Links, Unsubscribe Footer), Utility (HTML, Variable)
+- BlockRenderer component rendering each block type with appropriate UI (inputs, textareas, placeholders)
+- Bottom toolbar with 4 tabs: Text (formatting: Bold, Italic, Underline, Strikethrough, Code, Uppercase, alignment, lists), Image (upload), Components (layout block insertion), Variables (contact properties + system variables)
+- Variables tab showing {{{contact.first_name}}}, {{{contact.last_name}}}, {{{contact.email}}}, {{{contact.company_name}}}, {{{RESEND_UNSUBSCRIBE_URL}}}
+- "Pick a template" and "Upload HTML" action buttons below editor
+- Block insertion, editing, and removal with hover-reveal delete button
+- Keyboard interaction: '/' opens slash menu, Escape closes it, click-outside closes it
+
+### Test results
+- 8 new unit tests passing (slash menu categories/items, heading insertion, variables tab, toolbar tabs, text formatting, quote insertion, components tab, template/upload buttons)
+- 1 new E2E test (insert heading block via slash command, type text, verify)
+- 360 total unit tests passing (352 previous + 8 new), no regressions
+- make check: typecheck + lint passing
+
+### Decisions
+- Editor uses array of EditorBlock objects with id, type, content for state management
+- Slash menu positioned dynamically based on block count
+- Used biome-ignore for tabIndex on editor div (needed for keyboard focus/slash commands)
+- Unsubscribe footer uses button instead of anchor to satisfy a11y lint rules
+- COMPONENT_ITEMS computed from SLASH_MENU_ITEMS Layout + Utility categories
+
+### Files changed
+- src/components/broadcast-editor.tsx — Added block editor with slash commands, BlockRenderer, bottom toolbar
+- tests/block-editor.test.tsx — 8 unit tests for block editor functionality
+- tests/e2e/broadcast-editor.spec.ts — Added E2E test for slash command heading insertion

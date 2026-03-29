@@ -1427,7 +1427,7 @@
     "data_model": "Editor blocks: Array<{ type: 'text'|'title'|'subtitle'|'heading'|'bullet_list'|'numbered_list'|'quote'|'code_block'|'image'|'youtube'|'twitter'|'button'|'divider'|'section'|'columns'|'social_links'|'unsubscribe_footer'|'html'|'variable', content: any }>",
     "priority": 12,
     "core": false,
-    "passes": false,
+    "passes": true,
     "tests": {
       "unit": [
         {
