@@ -1,0 +1,25 @@
+## Iteration 1 — infra-001: Database Schema (2026-03-29)
+
+### What was built
+- Complete Drizzle ORM schema with 14 tables: domains, api_keys, emails, email_events, segments, topics, contacts, contact_segments, contact_topics, broadcasts, webhooks, templates, properties, logs
+- 7 PostgreSQL enums: email_status (12 values), domain_status (5), permission_type (2), broadcast_status (5), topic_visibility (2), topic_default_subscription (2), webhook_event (17)
+- Full relational mappings between all tables (foreign keys + Drizzle relations)
+- Database client with SSL support for RDS connections
+- Generated migration SQL and applied to RDS Postgres (14 tables created)
+
+### Test results
+- 22 unit tests passing (schema validation: table names, columns, enums, constraints)
+- make check: typecheck + lint passing
+- make test: all unit tests passing
+
+### Decisions
+- Used `sslmode=no-verify` for RDS connection (Amazon CA cert not in local trust store)
+- Applied migration SQL directly after schema reset (pre-existing tables from earlier attempts conflicted)
+- Added SSL config to both drizzle.config.ts and db/index.ts runtime client
+
+### Files changed
+- src/lib/db/schema.ts — Complete schema with all tables, enums, relations
+- src/lib/db/index.ts — DB client with SSL support
+- drizzle.config.ts — Updated with SSL handling for RDS
+- drizzle/0000_fearless_boomer.sql — Generated migration
+- tests/schema.test.ts — 22 unit tests for schema validation
