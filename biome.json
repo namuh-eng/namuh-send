@@ -16,6 +16,18 @@
     "indentWidth": 2
   },
   "files": {
-    "ignore": ["node_modules", ".next", "dist", "drizzle"]
+    "ignore": [
+      "node_modules",
+      ".next",
+      "dist",
+      "drizzle",
+      "packages/sdk/dist",
+      "test-results",
+      "playwright-report",
+      "*.config.js",
+      "postcss.config.js",
+      "coverage",
+      ".omc"
+    ]
   }
 }

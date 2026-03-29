@@ -12,7 +12,7 @@ You have access to the **original product URL** (passed as TARGET_URL). When you
 4. Compare against the clone's behavior
 5. `ever stop` when done comparing, then switch back to the clone session
 
-This is your **source of truth** — the clone should match the original's behavior. The PRD is a guide, but the original product is the authority.
+This is your **source of truth** — the clone should match the original's behavior.
 
 ## Your Inputs
 - `build-spec.md`: The product spec — what the clone should do.
@@ -28,13 +28,15 @@ This is your **source of truth** — the clone should match the original's behav
 ## This Iteration
 
 1. Read `qa-progress.txt` to see what has been tested.
-2. Read `prd.json` to find the next feature to test (first entry you haven't QA'd yet).
+2. Read `prd.json` to find the next feature to test (first entry you haven't QA'd yet). Note its `category`.
 
-### Step 1: Automated checks (before manual testing)
+### Step 1: Automated checks
 3. Run `make test` to verify unit tests still pass. If any fail, fix before proceeding.
-4. Run the **smoke E2E suite**: `npx playwright test tests/e2e/smoke.spec.ts` — this is a small, fast test (~5-10 tests) that verifies core navigation and page loads still work. Run this every iteration.
-5. If your fix touched **shared code** (layout, API client, auth middleware, routing, reusable components), also run the full `make test-e2e` to catch cross-feature regressions. Otherwise skip it.
-6. Note: The shell script runs full `make test-e2e` at the START and END of the QA phase automatically.
+4. Run the **smoke E2E suite**: `npx playwright test tests/e2e/smoke.spec.ts` — verifies core navigation and page loads still work.
+
+<important if="your fix touched shared code (layout, API client, auth middleware, routing, reusable components)">
+Also run the full `make test-e2e` to catch cross-feature regressions.
+</important>
 
 ### Step 2: Manual Verification (Ever CLI)
 5. Start the dev server if not running (`npm run dev`).
@@ -45,33 +47,46 @@ This is your **source of truth** — the clone should match the original's behav
    - `ever snapshot` to capture the DOM
    - Follow the `steps` from prd.json to verify each acceptance criterion
    - Compare behavior against the `behavior` field in prd.json
-   - Compare visual output against `screenshots/`
+   - Compare visual output against `screenshots/inspect/`
    - Test edge cases: empty inputs, rapid clicks, unexpected data
    - Try to break it — invalid inputs, missing data, weird navigation paths
 
-### Step 3: Real Backend Verification (skip for pure UI features)
-8. **Only for features with `category: "infrastructure"`, `"crud"`, or `"sdk"` in prd.json.** Skip this step for pure UI features (category: `"interaction"`, `"ui"`, `"search"`, `"nav"`, `"settings"`).
+<important if="category is infrastructure, crud, or sdk">
+### Step 3: Real Backend Verification
+8. Verify the feature uses real infrastructure, not mocks:
    - Does the API call actually hit AWS services (SES, RDS Postgres, S3)?
-   - Send a real email → does it arrive in the recipient's inbox?
-   - Create a domain → does SES generate real DKIM tokens? Does Cloudflare get real DNS records?
-   - Create an API key → does it authenticate real API requests?
    - Test via curl or the SDK directly, not just through the UI:
      ```bash
      curl -X POST http://localhost:3015/api/<endpoint> \
        -H "Authorization: Bearer <dev-api-key>" \
        -H "Content-Type: application/json" \
        -d '{"<request body matching the API spec>"}'
-     # Check build-progress.txt or the API routes for the dev API key and available endpoints.
      ```
+   - Send a real email → does it arrive in the recipient's inbox?
+   - Create a domain → does SES generate real DKIM tokens? Does Cloudflare get real DNS records?
+   - Create an API key → does it authenticate real API requests?
+</important>
 
-### Step 4: SDK Verification (if packages/sdk/ exists)
-9. For SDK features (`category: "sdk"` in prd.json):
+<important if="category is sdk AND packages/sdk/ exists">
+### Step 4: SDK Verification
+9. Test the SDK:
    - Run `cd packages/sdk && npm test`
-   - Test the SDK manually: import it, send an email, verify it works
+   - Test the SDK manually: import it, call the API, verify it works
    - If the SDK supports React rendering, test with a real React component
+   - Verify SDK examples in README actually work
+</important>
 
-### Step 5: Record & Fix
-10. Record findings in `qa-report.json`:
+<important if="this is the deployment feature or you're testing the live URL">
+### Step 5: Deployment Verification
+10. Verify the deployed version:
+    - Is the app deployed to a live URL?
+    - Does the deployed version work the same as localhost?
+    - Test the live URL with the same curl/SDK commands
+    - Are environment variables properly set on the deployed service?
+</important>
+
+### Record & Fix
+11. Record findings in `qa-report.json`:
     ```json
     {
       "feature_id": "feature-001",
@@ -88,53 +103,52 @@ This is your **source of truth** — the clone should match the original's behav
       ]
     }
     ```
-11. If bugs are found:
-    - Fix ALL bugs for this feature before committing (batch fixes, don't commit per bug)
+12. If bugs are found:
+    - Fix ALL bugs for this feature before committing (batch fixes)
     - After fixing all bugs, run `make check && make test` once
     - If any test fails, fix and re-run until all green
     - Commit all fixes together: `git commit -m "QA fix: <feature> — fixed N bugs: <brief list>"`
-12. Update `qa-progress.txt` with what you tested and results.
-13. **Commit and push:**
+13. Update `qa-progress.txt` with what you tested and results.
+14. **Commit and push:**
     - `git add -A`
     - Detailed commit message: feature tested, results, bugs found/fixed, QA progress
     - `git push`
 
 ## What To Test
 
-### Functional
+### Functional (all features)
 - Does each feature work as described in prd.json?
-- Do CRUD operations complete successfully against the real database?
 - Do forms validate inputs correctly?
 - Do modals/dropdowns/menus open and close properly?
 - Does navigation work (all links lead somewhere)?
-- Does search/filter return correct results from real data?
+- Does search/filter return correct results?
 
-### Real Backend
+<important if="category is crud or infrastructure">
+### Real Backend (crud/infrastructure features only)
+- Do CRUD operations complete successfully against the real database?
 - Are ALL data operations hitting real cloud services (not mock/fake data)?
 - Does sending an email actually deliver via AWS SES?
 - Do domains verify via real SES + Cloudflare DNS?
 - Do API keys authenticate real API requests?
 - Are API errors handled gracefully (rate limits, 4xx, 5xx)?
 - Is the API key kept server-side (never exposed to browser)?
+</important>
 
-### SDK (if applicable)
+<important if="category is sdk">
+### SDK (sdk features only)
 - Does the SDK successfully call the clone's API?
 - Does `{data, error}` return pattern work?
 - Does React rendering work (if supported)?
 - Do SDK examples in README actually work?
+</important>
 
-### Visual
+### Visual (all features with UI)
 - Does the layout match screenshots from the original?
 - Are colors, fonts, spacing consistent with build-spec.md design system?
 - Do empty states display properly?
 - Do loading states appear where expected?
 
-### Deployment
-- Is the app deployed to a live URL?
-- Does the deployed version work the same as localhost?
-- Test the live URL with the same curl/SDK commands.
-
-### Robustness
+### Robustness (all features)
 - What happens with empty inputs?
 - What happens with very long text?
 - Does the back button work correctly?
