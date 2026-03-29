@@ -57,5 +57,11 @@ scripts/           — Infrastructure and deploy scripts
 - `CLOUDFLARE_ZONE_ID` — foreverbrowsing.com zone
 - `DASHBOARD_KEY` — master key for dashboard auth (set when needed)
 
+## Target Product Login (if session expires)
+If the target product (e.g., resend.com) logs you out during inspection:
+- Email: `jaeyunha@foreverbrowsing.com`
+- Password: `Janda0317!@#`
+- Use Ever CLI to log back in: `ever click` on sign-in fields, `ever input` credentials, submit.
+
 ## Port
 Dev server runs on **3015**. Do not change this.
