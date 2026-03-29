@@ -4,6 +4,7 @@ dist/
 .env
 .DS_Store
 .omc/
+.omx/
 
 # Runtime files
 *.log

@@ -519,3 +519,35 @@
 - tests/e2e/email-detail-insights.spec.ts — E2E test for tab switching and Insights
 - tests/e2e/email-detail.spec.ts — Updated to verify Insights tab visibility
 - biome.json — Added .omx to ignore list
+
+## Iteration 18 — feature-023: Domains List Page (2026-03-29)
+
+### What was built
+- DomainsPage client component (`src/components/domains-page.tsx`) with:
+  - "Domains" h1 page title + "Add domain" button
+  - Filter bar: SearchInput for domain name filtering, Status combobox (All Statuses, Pending, Verified, Failed, Not Started), Region combobox (All Regions, North Virginia/us-east-1, Ireland/eu-west-1, São Paulo/sa-east-1, Tokyo/ap-northeast-1), Export button
+  - Data table with 5 columns: Domain (clickable link to /domains/:id), Status (colored badge), Region (friendly name + code), Created (relative time), More actions
+  - Status badges: verified=success(green), pending=warning(yellow), failed=error(red), not_started=default(gray)
+  - Region display with friendly name + region code (e.g., "North Virginia us-east-1")
+  - Client-side filtering by search, status, and region
+  - Pagination with 40/80/120 items per page
+  - Empty state "No domains found" when no domains match
+- Server page (`src/app/(dashboard)/domains/page.tsx`) fetching domains from DB ordered by created_at desc
+
+### Test results
+- 11 new unit tests passing (page title + button, status badges, region display, domain links, table columns, search filter, status filter, empty state, row actions, relative time, export button)
+- 2 E2E tests written (page render with filters, domain detail navigation)
+- 227 total unit tests passing (216 previous + 11 new), no regressions
+- make check: typecheck + lint passing
+
+### Decisions
+- Reused ComboboxFilter for both Status and Region dropdowns (searchable, consistent UX)
+- Reused formatRelativeTime from emails-sending-data-table for Created column
+- Client-side filtering for search, status, and region applied via useMemo
+- Server component fetches up to 200 domains from DB ordered by created_at desc
+
+### Files changed
+- src/components/domains-page.tsx — DomainsPage client component with filters, table, pagination
+- src/app/(dashboard)/domains/page.tsx — Server component fetching domains from DB
+- tests/domains-page.test.tsx — 11 unit tests for domains page
+- tests/e2e/domains-page.spec.ts — 2 E2E tests for domains page
