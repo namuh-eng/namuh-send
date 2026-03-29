@@ -42,7 +42,7 @@ for ((i=1; i<=$ITERATIONS; i++)); do
   fi
 
   result=$(claude -p --dangerously-skip-permissions --model claude-opus-4-6 \
-"@build-prompt.md @build-spec.md @prd.json @build-progress.txt @CLAUDE.md @ever-cli-reference.md
+"@build-prompt.md @build-spec.md @prd.json @build-progress.txt @CLAUDE.md
 
 ITERATION: $i of $ITERATIONS
 PROGRESS: $PASSES/$TOTAL features passed

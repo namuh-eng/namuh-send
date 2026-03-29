@@ -30,13 +30,13 @@ Use Ever CLI for visual and interactive testing:
 The clone has its own REST API. Test it directly:
 ```bash
 # Test email sending
-curl -X POST http://localhost:3000/api/emails \
+curl -X POST http://localhost:3015/api/emails \
   -H "Authorization: Bearer re_dev_token_123" \
   -H "Content-Type: application/json" \
   -d '{"from":"hello@domain.com","to":["test@email.com"],"subject":"Test","html":"<p>Hello</p>"}'
 
 # Test domain creation
-curl -X POST http://localhost:3000/api/domains \
+curl -X POST http://localhost:3015/api/domains \
   -H "Authorization: Bearer re_dev_token_123" \
   -H "Content-Type: application/json" \
   -d '{"name":"example.com"}'
@@ -75,7 +75,7 @@ If a live URL exists (check `build-progress.txt`), test the deployed version too
 ## Environment
 - AWS CLI configured via `~/.aws/credentials` (works out of the box)
 - `.env` has Cloudflare creds, DATABASE_URL, DASHBOARD_KEY
-- Dev server usually on port 3000 (check with `lsof -i :3000`)
+- Dev server usually on port 3000 (check with `lsof -i :3015`)
 
 ## Bug Fixing Rules
 - Fix bugs directly in source code

@@ -26,7 +26,7 @@ You are a DIFFERENT agent from the builder. Do not trust that features work just
 
 ### Step 2: Manual Verification (Ever CLI)
 5. Start the dev server if not running (`npm run dev`).
-6. Open the clone in Ever CLI: `ever start --url http://localhost:3000`
+6. Open the clone in Ever CLI: `ever start --url http://localhost:3015`
    (If a session is already running, just use it — do NOT start a new one.)
 7. **Test the feature thoroughly:**
    - Navigate to the relevant page
@@ -45,7 +45,7 @@ You are a DIFFERENT agent from the builder. Do not trust that features work just
    - Create an API key → does it authenticate real API requests?
    - Test via curl or the SDK directly, not just through the UI:
      ```bash
-     curl -X POST http://localhost:3000/api/emails \
+     curl -X POST http://localhost:3015/api/emails \
        -H "Authorization: Bearer re_dev_token_123" \
        -H "Content-Type: application/json" \
        -d '{"from":"hello@domain.com","to":["test@email.com"],"subject":"QA test","html":"<p>Test</p>"}'

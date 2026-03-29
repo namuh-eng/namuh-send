@@ -36,7 +36,7 @@ if [ -f "playwright.config.ts" ] || [ -d "tests/e2e" ]; then
 fi
 
 # Start Ever CLI session for QA
-ever start --url http://localhost:3000
+ever start --url http://localhost:3015
 echo "Ever CLI session started for QA."
 echo ""
 
