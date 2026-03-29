@@ -28,12 +28,32 @@ interface DataTableProps<T> {
 
 type SortDirection = "asc" | "desc";
 
+<<<<<<< HEAD
 function getComparableValue(value: unknown): number | string | null {
   if (value == null) return null;
   if (value instanceof Date) return value.getTime();
   if (typeof value === "number") return value;
   if (typeof value === "boolean") return value ? 1 : 0;
   return String(value).toLowerCase();
+=======
+function compareValues(a: unknown, b: unknown): number {
+  if (a == null && b == null) return 0;
+  if (a == null) return 1;
+  if (b == null) return -1;
+
+  if (a instanceof Date && b instanceof Date) {
+    return a.getTime() - b.getTime();
+  }
+
+  if (typeof a === "number" && typeof b === "number") {
+    return a - b;
+  }
+
+  return String(a).localeCompare(String(b), undefined, {
+    numeric: true,
+    sensitivity: "base",
+  });
+>>>>>>> origin/qa/design-001-data-table-20260329
 }
 
 export function DataTable<T>({
@@ -47,8 +67,15 @@ export function DataTable<T>({
 }: DataTableProps<T>) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+<<<<<<< HEAD
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+=======
+  const [sortState, setSortState] = useState<{
+    key: string;
+    direction: SortDirection;
+  } | null>(null);
+>>>>>>> origin/qa/design-001-data-table-20260329
   const menuRef = useRef<HTMLDivElement>(null);
 
   const sortedRows = useMemo(() => {
@@ -132,6 +159,31 @@ export function DataTable<T>({
   const hasActions = actions && actions.length > 0;
   const totalCols =
     columns.length + (checkboxEnabled ? 1 : 0) + (hasActions ? 1 : 0);
+  const displayRows = useMemo(() => {
+    if (!sortState) return rows;
+
+    const sorted = [...rows].sort((left, right) =>
+      compareValues(
+        (left as Record<string, unknown>)[sortState.key],
+        (right as Record<string, unknown>)[sortState.key],
+      ),
+    );
+
+    return sortState.direction === "desc" ? sorted.reverse() : sorted;
+  }, [rows, sortState]);
+
+  const toggleSort = useCallback((key: string) => {
+    setSortState((prev) => {
+      if (!prev || prev.key !== key) {
+        return { key, direction: "asc" };
+      }
+
+      return {
+        key,
+        direction: prev.direction === "asc" ? "desc" : "asc",
+      };
+    });
+  }, []);
 
   return (
     <table className="w-full">
@@ -159,19 +211,37 @@ export function DataTable<T>({
                   : "none"
               }
               className="px-3 py-2 text-left text-[12px] font-medium text-[#A1A4A5] tracking-normal"
+              aria-sort={
+                sortState?.key === col.key
+                  ? sortState.direction === "asc"
+                    ? "ascending"
+                    : "descending"
+                  : "none"
+              }
             >
               {col.sortable ? (
                 <button
                   type="button"
+<<<<<<< HEAD
                   className="inline-flex items-center gap-1 hover:text-[#F0F0F0] transition-colors"
+=======
+                  className="inline-flex items-center gap-1 transition-colors hover:text-[#F0F0F0]"
+>>>>>>> origin/qa/design-001-data-table-20260329
                   onClick={() => toggleSort(col.key)}
                 >
                   {col.header}
                   <span aria-hidden="true" className="text-[10px]">
+<<<<<<< HEAD
                     {sortKey === col.key
                       ? sortDirection === "asc"
                         ? "▲"
                         : "▼"
+=======
+                    {sortState?.key === col.key
+                      ? sortState.direction === "asc"
+                        ? "↑"
+                        : "↓"
+>>>>>>> origin/qa/design-001-data-table-20260329
                       : "↕"}
                   </span>
                 </button>
@@ -194,7 +264,11 @@ export function DataTable<T>({
             </td>
           </tr>
         ) : (
+<<<<<<< HEAD
           sortedRows.map((row) => {
+=======
+          displayRows.map((row) => {
+>>>>>>> origin/qa/design-001-data-table-20260329
             const id = getRowId(row);
             return (
               <tr

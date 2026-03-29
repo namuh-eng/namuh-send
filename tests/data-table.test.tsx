@@ -191,6 +191,7 @@ describe("DataTable", () => {
   });
 
   it("sorts rows ascending and descending when a sortable header is clicked", () => {
+<<<<<<< HEAD
     render(<DataTable columns={columns} rows={rows} getRowId={(r) => r.id} />);
 
     const nameSortButton = screen.getByRole("button", { name: /Name/i });
@@ -221,5 +222,45 @@ describe("DataTable", () => {
         .getByRole("columnheader", { name: /Name/i })
         .getAttribute("aria-sort"),
     ).toBe("none");
+=======
+    const unsortedRows = [rows[2], rows[0], rows[1]];
+    render(
+      <DataTable
+        columns={columns}
+        rows={unsortedRows}
+        getRowId={(r) => r.id}
+      />,
+    );
+
+    const nameHeader = screen.getByRole("button", { name: /Name/ });
+    fireEvent.click(nameHeader);
+
+    let renderedRows = screen
+      .getAllByRole("row")
+      .slice(1)
+      .map((row) => row.textContent);
+    expect(renderedRows[0]).toContain("Item A");
+    expect(renderedRows[1]).toContain("Item B");
+    expect(renderedRows[2]).toContain("Item C");
+    expect(
+      screen
+        .getByRole("columnheader", { name: /Name/ })
+        .getAttribute("aria-sort"),
+    ).toBe("ascending");
+
+    fireEvent.click(nameHeader);
+    renderedRows = screen
+      .getAllByRole("row")
+      .slice(1)
+      .map((row) => row.textContent);
+    expect(renderedRows[0]).toContain("Item C");
+    expect(renderedRows[1]).toContain("Item B");
+    expect(renderedRows[2]).toContain("Item A");
+    expect(
+      screen
+        .getByRole("columnheader", { name: /Name/ })
+        .getAttribute("aria-sort"),
+    ).toBe("descending");
+>>>>>>> origin/qa/design-001-data-table-20260329
   });
 });
