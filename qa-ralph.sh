@@ -48,11 +48,11 @@ for ((i=1; i<=$ITERATIONS; i++)); do
 "$(cat qa-prompt.md)
 
 Read these files before starting:
-@ build-spec.md
-@ prd.json
-@ qa-progress.txt
-@ qa-report.json
-@ ever-cli-reference.md
+@build-spec.md
+@prd.json
+@qa-progress.txt
+@qa-report.json
+@ever-cli-reference.md
 
 ITERATION: $i of $ITERATIONS
 
