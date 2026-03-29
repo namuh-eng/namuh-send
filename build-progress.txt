@@ -720,3 +720,38 @@
 - src/app/(dashboard)/audience/topics/page.tsx — Topics tab page
 - tests/audience-layout.test.tsx — 8 unit tests for audience layout
 - tests/e2e/audience-layout.spec.ts — 5 E2E tests for tab navigation and dropdown
+
+## Iteration 23 — feature-017: Contacts List Table (2026-03-29)
+
+### What was built
+- Contacts list API route (GET /api/contacts) with search, pagination, status filtering
+- Left-join query to include segment names per contact
+- Groups joined rows by contact ID to aggregate segments
+- ContactsList client component with:
+  - Search input with 300ms debounce
+  - "All contacts" segment filter dropdown
+  - "All subscriptions" status filter dropdown (subscribed/unsubscribed)
+  - Export button
+  - Data table with checkbox column, Email (avatar + email + name link), Segments, Status (green badge), Added (relative time)
+  - Row actions (three-dot menu, visible on hover)
+  - Pagination with page navigation
+- Updated audience page to render ContactsList instead of EmptyState
+
+### Test results
+- 8 new unit tests passing (API route shape, search, pagination, status formatting, segment grouping, empty state, pagination calc)
+- 286 total tests passing, no regressions
+- 4 E2E tests (filter bar rendering, table headers, contact click navigation, search filtering)
+- make check: typecheck + lint passing
+
+### Decisions
+- Reused existing DataTable pattern but built custom table for tighter control over contact-specific columns
+- Reused formatRelativeTime from emails-sending-data-table and StatusBadge component
+- Used left join with contactSegments + segments tables to get segment names in a single query
+- Debounced search to avoid excessive API calls
+
+### Files changed
+- src/app/api/contacts/route.ts — GET handler with search, pagination, segment join
+- src/components/contacts-list.tsx — ContactsList component with filter bar, table, pagination
+- src/app/(dashboard)/audience/page.tsx — Updated to use ContactsList
+- tests/contacts-list.test.ts — 8 unit tests
+- tests/e2e/contacts-list.spec.ts — 4 E2E tests

@@ -1,10 +1,5 @@
-import { EmptyState } from "@/components/empty-state";
+import { ContactsList } from "@/components/contacts-list";
 
 export default function ContactsPage() {
-  return (
-    <EmptyState
-      title="No contacts"
-      description="Add contacts to start sending emails to your audience."
-    />
-  );
+  return <ContactsList />;
 }
