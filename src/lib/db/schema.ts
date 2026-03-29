@@ -277,10 +277,13 @@ export const templates = pgTable("templates", {
     .defaultNow(),
 });
 
+export const propertyType = pgEnum("property_type", ["string", "number"]);
+
 export const properties = pgTable("properties", {
   id: uuid("id").primaryKey().defaultRandom(),
-  name: varchar("name", { length: 255 }).notNull().unique(),
-  description: text("description"),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  type: propertyType("type").notNull().default("string"),
+  fallbackValue: text("fallback_value"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

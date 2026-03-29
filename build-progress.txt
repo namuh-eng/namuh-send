@@ -814,4 +814,45 @@
 - src/app/(dashboard)/audience/contacts/[id]/page.tsx — Server page with DB queries
 - tests/contact-detail.test.tsx — 6 unit tests
 - tests/e2e/contact-detail.spec.ts — E2E test for contact detail flow
-- prd.json — feature-019 passes: true
+- prd.json ��� feature-019 passes: true
+
+## Iteration 26 — feature-020: Properties List Table & Add Property Modal (2026-03-29)
+
+### What was built
+- Properties list page at /audience/properties with:
+  - Data table with columns: checkbox, Name (monospace), Type (string/number), Fallback value, Created (relative time)
+  - Search input (placeholder 'Search...') filters properties by name
+  - Type filter combobox ('All Types', 'String', 'Number') narrows by type
+  - Row action menu (three-dot button)
+  - Pagination with page navigation
+  - Empty state when no properties exist
+- Add Property modal with:
+  - Name input (required, maxlength 100, placeholder 'e.g., company_name')
+  - Type select (String, Number)
+  - Fallback Value input (optional, placeholder 'Value to use when property is empty')
+  - Add + Cancel buttons
+  - Client-side and server-side validation
+- Updated DB schema: added `type` (property_type enum: string/number) and `fallback_value` columns to properties table, removed `description` column, narrowed name to varchar(100)
+- GET /api/properties — lists properties with search, type filter, pagination
+- POST /api/properties — creates new property with validation
+
+### Test results
+- 7 new unit tests passing (renders rows with columns, modal type options, search filter, type filter, submit new property, empty state, maxlength enforcement)
+- 312 total tests passing (305 previous + 7 new), no regressions
+- make check: typecheck + lint passing
+- 1 E2E test written (create new property flow)
+
+### Decisions
+- Used same UI patterns as contacts-list (filter bar, table, pagination, modal)
+- Properties table schema updated via direct SQL migration (drizzle-kit push had auth issues)
+- Reused formatRelativeTime from emails-sending-data-table for Created column
+- Added htmlFor/id associations on modal form labels for a11y lint compliance
+
+### Files changed
+- src/lib/db/schema.ts — Added propertyType enum, updated properties table (type, fallback_value columns)
+- src/components/properties-list.tsx — PropertiesList component with table + AddPropertyModal
+- src/app/api/properties/route.ts — GET and POST API routes
+- src/app/(dashboard)/audience/properties/page.tsx �� Wired up PropertiesList component
+- tests/properties.test.tsx — 7 unit tests
+- tests/e2e/properties.spec.ts — E2E test for create property flow
+- prd.json — feature-020 passes: true

@@ -1,10 +1,5 @@
-import { EmptyState } from "@/components/empty-state";
+import { PropertiesList } from "@/components/properties-list";
 
 export default function PropertiesPage() {
-  return (
-    <EmptyState
-      title="No properties"
-      description="Properties let you store custom data about your contacts."
-    />
-  );
+  return <PropertiesList />;
 }
