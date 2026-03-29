@@ -800,7 +800,7 @@
     "data_model": "DomainDNSRecord: type (TXT|MX|CNAME), name (string), content (string), ttl (string|'Auto'), priority (number|null), status (verified|pending|failed). Domain has sending_enabled (boolean), receiving_enabled (boolean).",
     "priority": 7,
     "core": true,
-    "passes": false,
+    "passes": true,
     "tests": {
       "unit": [
         {

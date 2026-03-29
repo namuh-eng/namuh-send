@@ -19,6 +19,8 @@ const baseDomain: DomainDetailData = {
   clickTracking: false,
   openTracking: false,
   tls: true,
+  sendingEnabled: true,
+  receivingEnabled: false,
   records: [
     {
       type: "TXT",
@@ -94,11 +96,11 @@ describe("DomainDetail", () => {
 
   it("renders DNS records table with correct columns", () => {
     render(<DomainDetail domain={baseDomain} />);
-    expect(screen.getByText("Type")).toBeTruthy();
-    expect(screen.getByText("Name")).toBeTruthy();
-    expect(screen.getByText("Content")).toBeTruthy();
-    expect(screen.getByText("TTL")).toBeTruthy();
-    expect(screen.getByText("Status")).toBeTruthy();
+    expect(screen.getAllByText("Type").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Name").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Content").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("TTL").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Status").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("TXT")).toBeTruthy();
   });
 

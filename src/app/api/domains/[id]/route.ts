@@ -56,6 +56,12 @@ export async function PATCH(
     if (body.open_tracking !== undefined) {
       updates.openTracking = body.open_tracking;
     }
+    if (body.sending_enabled !== undefined) {
+      updates.sendingEnabled = body.sending_enabled;
+    }
+    if (body.receiving_enabled !== undefined) {
+      updates.receivingEnabled = body.receiving_enabled;
+    }
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: "No valid fields" }, { status: 400 });

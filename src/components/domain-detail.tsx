@@ -15,6 +15,8 @@ export interface DomainDetailData {
   clickTracking: boolean;
   openTracking: boolean;
   tls: boolean;
+  sendingEnabled: boolean;
+  receivingEnabled: boolean;
   records: Array<{
     type: string;
     name: string;
@@ -424,8 +426,137 @@ export function DomainDetail({ domain }: DomainDetailProps) {
   );
 }
 
+function CopyButton({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false);
+
+  return (
+    <button
+      type="button"
+      aria-label="Copy to clipboard"
+      className="ml-1 p-0.5 text-[#A1A4A5] hover:text-[#F0F0F0] transition-colors inline-flex items-center"
+      onClick={() => {
+        navigator.clipboard.writeText(value);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }}
+    >
+      {copied ? (
+        <svg
+          aria-hidden="true"
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#4ade80"
+          strokeWidth="2"
+        >
+          <path d="M20 6L9 17l-5-5" />
+        </svg>
+      ) : (
+        <svg
+          aria-hidden="true"
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
+function DNSRecordTable({
+  records,
+}: {
+  records: DomainDetailData["records"];
+}) {
+  const rows = records || [];
+  return (
+    <table className="w-full">
+      <thead>
+        <tr className="border-b border-[rgba(176,199,217,0.145)]">
+          <th className="px-3 py-2 text-left text-[12px] font-medium text-[#A1A4A5]">
+            Type
+          </th>
+          <th className="px-3 py-2 text-left text-[12px] font-medium text-[#A1A4A5]">
+            Name
+          </th>
+          <th className="px-3 py-2 text-left text-[12px] font-medium text-[#A1A4A5]">
+            Content
+          </th>
+          <th className="px-3 py-2 text-left text-[12px] font-medium text-[#A1A4A5]">
+            TTL
+          </th>
+          <th className="px-3 py-2 text-left text-[12px] font-medium text-[#A1A4A5]">
+            Priority
+          </th>
+          <th className="px-3 py-2 text-left text-[12px] font-medium text-[#A1A4A5]">
+            Status
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((record) => (
+          <tr
+            key={`${record.type}-${record.name}-${record.value.slice(0, 20)}`}
+            className="border-b border-[rgba(176,199,217,0.145)] last:border-b-0"
+          >
+            <td className="px-3 py-2 text-[14px] text-[#F0F0F0]">
+              {record.type}
+            </td>
+            <td className="px-3 py-2 font-mono text-[12px] text-[#F0F0F0]">
+              <span className="flex items-center gap-1">
+                <span className="max-w-[180px] truncate">{record.name}</span>
+                <CopyButton value={record.name} />
+              </span>
+            </td>
+            <td className="px-3 py-2 font-mono text-[12px] text-[#F0F0F0] max-w-[200px]">
+              <span className="flex items-center gap-1">
+                <span className="truncate">{record.value}</span>
+                <CopyButton value={record.value} />
+              </span>
+            </td>
+            <td className="px-3 py-2 text-[14px] text-[#A1A4A5]">
+              {record.ttl}
+            </td>
+            <td className="px-3 py-2 text-[14px] text-[#A1A4A5]">
+              {record.priority ?? "—"}
+            </td>
+            <td className="px-3 py-2">
+              <StatusBadge
+                status={formatStatusLabel(record.status)}
+                variant={record.status === "verified" ? "success" : "warning"}
+              />
+            </td>
+          </tr>
+        ))}
+        {rows.length === 0 && (
+          <tr>
+            <td
+              colSpan={6}
+              className="px-3 py-8 text-center text-[14px] text-[#A1A4A5]"
+            >
+              No DNS records
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  );
+}
+
 function RecordsTab({ domain }: { domain: DomainDetailData }) {
+  const router = useRouter();
   const [autoConfiguring, setAutoConfiguring] = useState(false);
+  const [sendingEnabled, setSendingEnabled] = useState(domain.sendingEnabled);
+  const [receivingEnabled, setReceivingEnabled] = useState(
+    domain.receivingEnabled,
+  );
 
   const handleAutoConfigure = useCallback(async () => {
     setAutoConfiguring(true);
@@ -433,17 +564,49 @@ function RecordsTab({ domain }: { domain: DomainDetailData }) {
       await fetch(`/api/domains/${domain.id}/auto-configure`, {
         method: "POST",
       });
+      router.refresh();
     } catch {
       // silently fail
     } finally {
       setAutoConfiguring(false);
     }
-  }, [domain.id]);
+  }, [domain.id, router]);
+
+  const handleToggle = useCallback(
+    async (field: "sending_enabled" | "receiving_enabled", value: boolean) => {
+      try {
+        await fetch(`/api/domains/${domain.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ [field]: value }),
+        });
+        router.refresh();
+      } catch {
+        if (field === "sending_enabled") setSendingEnabled(!value);
+        else setReceivingEnabled(!value);
+      }
+    },
+    [domain.id, router],
+  );
 
   const records = domain.records || [];
 
+  // Split records into sections
+  const dkimRecords = records.filter(
+    (r) =>
+      r.name.includes("_domainkey") ||
+      (r.type === "TXT" && r.value.startsWith("p=")),
+  );
+
+  const sendingRecords = records.filter(
+    (r) =>
+      (r.type === "MX" && r.value.includes("feedback-smtp")) ||
+      (r.type === "TXT" && r.value.includes("v=spf1")),
+  );
+
   return (
     <div className="bg-[rgba(24,25,28,0.88)] border border-[rgba(176,199,217,0.145)] rounded-lg p-6">
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-[18px] font-semibold text-[#F0F0F0]">
           DNS Records
@@ -472,77 +635,77 @@ function RecordsTab({ domain }: { domain: DomainDetailData }) {
         </div>
       </div>
 
-      <div className="mb-4">
+      {/* Section 1: Domain Verification (DKIM) */}
+      <div className="mb-8">
         <h3 className="text-[14px] font-semibold text-[#F0F0F0] mb-1">
           Domain Verification
         </h3>
         <p className="text-[13px] text-blue-400 mb-4">DKIM</p>
+        <DNSRecordTable records={dkimRecords.length > 0 ? dkimRecords : null} />
       </div>
 
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-[rgba(176,199,217,0.145)]">
-            <th className="px-3 py-2 text-left text-[12px] font-medium text-[#A1A4A5]">
-              Type
-            </th>
-            <th className="px-3 py-2 text-left text-[12px] font-medium text-[#A1A4A5]">
-              Name
-            </th>
-            <th className="px-3 py-2 text-left text-[12px] font-medium text-[#A1A4A5]">
-              Content
-            </th>
-            <th className="px-3 py-2 text-left text-[12px] font-medium text-[#A1A4A5]">
-              TTL
-            </th>
-            <th className="px-3 py-2 text-left text-[12px] font-medium text-[#A1A4A5]">
-              Priority
-            </th>
-            <th className="px-3 py-2 text-left text-[12px] font-medium text-[#A1A4A5]">
-              Status
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {records.map((record) => (
-            <tr
-              key={`${record.type}-${record.name}`}
-              className="border-b border-[rgba(176,199,217,0.145)] last:border-b-0"
-            >
-              <td className="px-3 py-2 text-[14px] text-[#F0F0F0]">
-                {record.type}
-              </td>
-              <td className="px-3 py-2 text-[14px] text-[#F0F0F0] font-mono text-[12px]">
-                {record.name}
-              </td>
-              <td className="px-3 py-2 text-[14px] text-[#F0F0F0] font-mono text-[12px] max-w-[200px] truncate">
-                {record.value}
-              </td>
-              <td className="px-3 py-2 text-[14px] text-[#A1A4A5]">
-                {record.ttl}
-              </td>
-              <td className="px-3 py-2 text-[14px] text-[#A1A4A5]">
-                {record.priority ?? "—"}
-              </td>
-              <td className="px-3 py-2">
-                <StatusBadge
-                  status={formatStatusLabel(record.status)}
-                  variant={record.status === "verified" ? "success" : "warning"}
-                />
-              </td>
-            </tr>
-          ))}
-          {records.length === 0 && (
-            <tr>
-              <td
-                colSpan={6}
-                className="px-3 py-8 text-center text-[14px] text-[#A1A4A5]"
-              >
-                No DNS records
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+      {/* Section 2: Enable Sending (SPF) */}
+      <div className="mb-8 border-t border-[rgba(176,199,217,0.145)] pt-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-[14px] font-semibold text-[#F0F0F0]">
+            Enable Sending
+          </h3>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={sendingEnabled}
+            data-testid="sending-toggle"
+            data-state={sendingEnabled ? "checked" : "unchecked"}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              sendingEnabled ? "bg-[#4ade80]" : "bg-[rgba(176,199,217,0.2)]"
+            }`}
+            onClick={() => {
+              const newVal = !sendingEnabled;
+              setSendingEnabled(newVal);
+              handleToggle("sending_enabled", newVal);
+            }}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                sendingEnabled ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
+        <DNSRecordTable
+          records={sendingRecords.length > 0 ? sendingRecords : null}
+        />
+      </div>
+
+      {/* Section 3: Enable Receiving */}
+      <div className="border-t border-[rgba(176,199,217,0.145)] pt-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-[14px] font-semibold text-[#F0F0F0]">
+            Enable Receiving
+          </h3>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={receivingEnabled}
+            data-testid="receiving-toggle"
+            data-state={receivingEnabled ? "checked" : "unchecked"}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              receivingEnabled ? "bg-[#4ade80]" : "bg-[rgba(176,199,217,0.2)]"
+            }`}
+            onClick={() => {
+              const newVal = !receivingEnabled;
+              setReceivingEnabled(newVal);
+              handleToggle("receiving_enabled", newVal);
+            }}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                receivingEnabled ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

@@ -70,6 +70,8 @@ export default async function DomainDetailPage({
         clickTracking: domain.clickTracking,
         openTracking: domain.openTracking,
         tls: domain.tls,
+        sendingEnabled: domain.sendingEnabled,
+        receivingEnabled: domain.receivingEnabled,
         records: domain.records ?? null,
         events,
       }}
