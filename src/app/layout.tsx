@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Clone Dashboard",
-  description: "Autonomously cloned product",
+  title: "Resend Clone",
+  description: "Email API for developers",
 };
 
 export default function RootLayout({
@@ -13,7 +13,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="bg-gray-950 text-gray-100 min-h-screen">{children}</body>
+      <body className="bg-black text-gray-100 min-h-screen antialiased">
+        {children}
+      </body>
     </html>
   );
 }

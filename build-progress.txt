@@ -100,3 +100,47 @@
 ### Files changed
 - src/lib/s3.ts — S3 client with upload, presigned URL, and delete operations
 - tests/s3.test.ts — 15 unit tests covering all functions and edge cases
+
+## Iteration 5 — layout-001: Core App Shell (2026-03-29)
+
+### What was built
+- Sidebar component (`src/components/sidebar.tsx`) with 10 nav items: Emails, Broadcasts, Templates, Audience, Metrics, Domains, Logs, API Keys, Webhooks, Settings
+- Each nav item has an SVG icon matching Resend's visual design
+- Team switcher at top ("foreverbrowsing" with purple avatar + gear icon)
+- User section at bottom (avatar + email)
+- Active nav highlighting with `data-active` attribute and distinct styling
+- Dashboard layout with sidebar (fixed 250px) + content area + top header bar (Feedback, Help, Docs)
+- Dark theme: #000 background, #F0F0F0 active text, #A1A4A5 inactive text, rgba(24,25,28,0.88) active bg
+- Root `/` redirects to `/emails`
+- Next.js App Router route group `(dashboard)` for all sidebar pages
+- 10 stub pages created for each nav route
+
+### Test results
+- 5 new unit tests passing (sidebar nav config: count, labels, hrefs, uniqueness)
+- 5 E2E smoke tests written (sidebar render, navigation, active highlighting, redirect, persistence)
+- 73 total unit tests passing (22 schema + 16 SES + 15 Cloudflare + 15 S3 + 5 sidebar), no regressions
+- make check: typecheck + lint passing
+
+### Decisions
+- Used Next.js route group `(dashboard)` for sidebar layout to keep root layout clean
+- SVGs use `aria-hidden="true"` for Biome a11y lint compliance (labels provide text)
+- Active state uses both visual styling and `data-active` attribute for E2E testability
+
+### Files changed
+- src/components/sidebar.tsx — Sidebar component with nav, team switcher, user section
+- src/app/layout.tsx — Root layout (dark theme, updated title)
+- src/app/page.tsx — Root redirect to /emails
+- src/app/(dashboard)/layout.tsx — Dashboard layout with sidebar + header
+- src/app/(dashboard)/page.tsx — Dashboard redirect to /emails
+- src/app/(dashboard)/emails/page.tsx — Emails stub page
+- src/app/(dashboard)/broadcasts/page.tsx — Broadcasts stub page
+- src/app/(dashboard)/templates/page.tsx — Templates stub page
+- src/app/(dashboard)/audience/page.tsx — Audience stub page
+- src/app/(dashboard)/metrics/page.tsx — Metrics stub page
+- src/app/(dashboard)/domains/page.tsx — Domains stub page
+- src/app/(dashboard)/logs/page.tsx — Logs stub page
+- src/app/(dashboard)/api-keys/page.tsx — API Keys stub page
+- src/app/(dashboard)/webhooks/page.tsx — Webhooks stub page
+- src/app/(dashboard)/settings/page.tsx — Settings stub page
+- tests/sidebar.test.ts — 5 unit tests for sidebar nav config
+- tests/e2e/smoke.spec.ts — 5 E2E smoke tests for navigation

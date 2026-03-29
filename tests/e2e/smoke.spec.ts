@@ -1,6 +1,59 @@
 import { expect, test } from "@playwright/test";
 
-test("homepage loads", async ({ page }) => {
+const NAV_ITEMS = [
+  { label: "Emails", path: "/emails" },
+  { label: "Broadcasts", path: "/broadcasts" },
+  { label: "Templates", path: "/templates" },
+  { label: "Audience", path: "/audience" },
+  { label: "Metrics", path: "/metrics" },
+  { label: "Domains", path: "/domains" },
+  { label: "Logs", path: "/logs" },
+  { label: "API Keys", path: "/api-keys" },
+  { label: "Webhooks", path: "/webhooks" },
+  { label: "Settings", path: "/settings" },
+];
+
+test("sidebar renders with all 10 nav items", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator("h1")).toBeVisible();
+  const sidebar = page.locator("nav");
+  for (const item of NAV_ITEMS) {
+    await expect(sidebar.getByRole("link", { name: item.label })).toBeVisible();
+  }
+});
+
+test("navigate between pages via sidebar", async ({ page }) => {
+  await page.goto("/");
+
+  // Click Emails
+  await page.getByRole("link", { name: "Emails" }).click();
+  await expect(page).toHaveURL(/\/emails/);
+  await expect(page.getByRole("heading", { name: "Emails" })).toBeVisible();
+
+  // Click Domains
+  await page.getByRole("link", { name: "Domains" }).click();
+  await expect(page).toHaveURL(/\/domains/);
+  await expect(page.getByRole("heading", { name: "Domains" })).toBeVisible();
+});
+
+test("active nav item is highlighted", async ({ page }) => {
+  await page.goto("/emails");
+  const emailsLink = page.getByRole("link", { name: "Emails" });
+  await expect(emailsLink).toHaveAttribute("data-active", "true");
+});
+
+test("home page redirects to emails", async ({ page }) => {
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/emails/);
+});
+
+test("sidebar is persistent across navigation", async ({ page }) => {
+  await page.goto("/emails");
+  const sidebar = page.locator("nav");
+  await expect(sidebar).toBeVisible();
+
+  await page.getByRole("link", { name: "Domains" }).click();
+  await expect(sidebar).toBeVisible();
+
+  await page.getByRole("link", { name: "API Keys" }).click();
+  await expect(sidebar).toBeVisible();
 });
