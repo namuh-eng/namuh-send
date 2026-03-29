@@ -383,4 +383,38 @@
 - screenshots/inspect/ — webhooks-list.jpg, webhooks-add-modal.jpg, webhooks-event-types.jpg
 
 ### Next:
-- Iteration 10: Deep dive — Settings page (Usage, SMTP, Integrations, Unsubscribe page, Documents tabs) OR Metrics page
+- Iteration 11: Deep dive — Settings page (Usage, SMTP, Integrations, Unsubscribe page, Documents tabs)
+
+---
+
+## Iteration 10: Metrics Page Deep Dive — COMPLETE (2026-03-29)
+
+### What was done:
+- Navigated to Metrics page, waited for data to load
+- Inspected header filters: domain combobox (All Domains + individual domains with region flags) and date range picker (6 presets + calendar)
+- Opened and inspected "All Events" dropdown menu — 10 event type options:
+  - All Events, Received, Delivered, Opened, Clicked, Bounced, Complained, Unsubscribed, Delivery Delayed, Failed, Suppressed
+- Inspected 3 metric sections: Deliverability Rate, Bounce Rate, Complain Rate
+- Inspected SVG charts: deliverability (date axis), bounce rate (0-8% axis), complain rate (0-0.2% axis)
+- Inspected bounce rate info panel: "How Bounce Rate Works" dialog with explanation, types, risk level (>4%), formula, article links
+- Inspected breakdown tables: per-domain deliverability, bounce types (Transient/Permanent/Undetermined), complain (Complained)
+- Confirmed breakdown row links navigate to /emails with pre-applied status + date filters
+
+### Key findings:
+- Metrics is a charts/analytics page — no table, no search, no pagination, no API drawer
+- 10 deliverability event types in the filter (vs 17 webhook event types)
+- 3 metric sections: Deliverability Rate (with event filter + per-domain breakdown), Bounce Rate, Complain Rate
+- Each section has: summary percentage + SVG chart + breakdown table
+- Bounce and Complain rate have expandable info panels explaining the metric, risk levels, formulas
+- Bounce rate >4% triggers sending pause warning
+- Breakdown links navigate to Emails page with pre-applied filters (statuses + date range in URL params)
+- Data refreshes every 15 minutes (not real-time), shows last updated timestamp
+- Domain filter shows region flags (e.g., us-east-1) next to each domain name
+
+### Files created/updated:
+- build-spec.md — Added section 6.22 (Metrics Page)
+- prd.json — Added 4 feature entries (feature-036 through feature-039)
+- screenshots/inspect/ — metrics-page.jpg, metrics-date-range.jpg, metrics-bounce-info.jpg, metrics-events-menu.jpg, metrics-full.jpg
+
+### Next:
+- Iteration 11: Deep dive — Settings page (Usage, SMTP, Integrations, Unsubscribe page, Documents tabs)

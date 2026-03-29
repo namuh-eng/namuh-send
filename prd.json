@@ -1689,5 +1689,181 @@
         }
       ]
     }
+  },
+  {
+    "id": "feature-036",
+    "category": "layout",
+    "description": "Metrics page layout with domain filter, date range picker, and 3 metric sections",
+    "page": "Metrics",
+    "ui_details": "Page title 'Metrics' with two header filters: domain combobox (All Domains + individual domains with region flag icons) and date range picker (shared component with 6 presets + calendar). Below: 3 collapsible sections for Deliverability Rate, Bounce Rate, Complain Rate. Footer: 'Data is updated every 15 minutes. Last updated [time].'",
+    "behavior": "Domain filter filters all metrics by selected domain. Date range picker updates the time window. Default: All Domains + Last 15 days. Data refreshes every 15 minutes (not real-time).",
+    "data_model": "Aggregated email event data: { domain: string, date: Date, event_type: string, count: number }. Precomputed or queried from email events table.",
+    "priority": 16,
+    "core": false,
+    "passes": false,
+    "tests": {
+      "unit": [
+        {
+          "name": "renders Metrics page with header filters",
+          "description": "Page renders with domain combobox and date range picker",
+          "input": "Navigate to /metrics",
+          "expected_output": "Domain filter shows 'All Domains', date range shows 'Last 15 days', 3 metric sections visible"
+        },
+        {
+          "name": "date range presets calculate correct date windows",
+          "description": "Each preset maps to correct start/end dates",
+          "input": "Select 'Last 7 days' preset",
+          "expected_output": "Start date is 7 days ago, end date is today"
+        }
+      ],
+      "e2e": [
+        {
+          "name": "filter metrics by domain",
+          "steps": [
+            "Navigate to /metrics",
+            "Click domain combobox",
+            "Select a specific domain",
+            "Verify all 3 metric sections update"
+          ],
+          "expected": "Charts and breakdown tables reflect data for selected domain only"
+        }
+      ],
+      "edge_cases": [
+        {
+          "name": "no data for selected date range",
+          "steps": ["Select 'Today' when no emails sent today"],
+          "expected": "Charts show empty/zero state, all percentages show 0%"
+        }
+      ]
+    }
+  },
+  {
+    "id": "feature-037",
+    "category": "data",
+    "description": "Deliverability Rate section with event type filter, chart, and per-domain breakdown",
+    "page": "Metrics",
+    "ui_details": "Summary row: 'Emails' count + 'Deliverability Rate' percentage. Event type filter dropdown menu with 10 options: All Events, Received, Delivered, Opened, Clicked, Bounced, Complained, Unsubscribed, Delivery Delayed, Failed, Suppressed. SVG bar/line chart with daily date axis. Domain breakdown table: domain name + deliverability percentage.",
+    "behavior": "Event type filter changes which events are counted in the chart. Chart shows daily bars/lines for the selected date range. Domain breakdown shows per-domain deliverability rate. Percentage button on each domain row is expandable (tooltip/popover).",
+    "data_model": "Deliverability rate = delivered / total_sent * 100. Event types for filtering: received, delivered, opened, clicked, bounced, complained, unsubscribed, delivery_delayed, failed, suppressed.",
+    "priority": 16,
+    "core": false,
+    "passes": false,
+    "tests": {
+      "unit": [
+        {
+          "name": "calculates deliverability rate correctly",
+          "description": "Rate formula is delivered / sent * 100",
+          "input": "{ delivered: 95, sent: 100 }",
+          "expected_output": "95%"
+        },
+        {
+          "name": "event type filter options include all 10 types",
+          "description": "Dropdown renders all event type options",
+          "input": "Render event type filter",
+          "expected_output": "10 menu items: All Events + 9 individual types"
+        }
+      ],
+      "e2e": [
+        {
+          "name": "filter chart by event type",
+          "steps": [
+            "Navigate to /metrics",
+            "Click 'All Events' dropdown",
+            "Select 'Delivered'",
+            "Verify chart updates to show only delivered events"
+          ],
+          "expected": "Chart reflects delivered events only, dropdown label changes to 'Delivered'"
+        }
+      ],
+      "edge_cases": [
+        {
+          "name": "100% deliverability rate display",
+          "steps": ["View metrics when all emails delivered successfully"],
+          "expected": "Shows '100%' in summary and '100%' for each domain"
+        }
+      ]
+    }
+  },
+  {
+    "id": "feature-038",
+    "category": "data",
+    "description": "Bounce Rate section with expandable info panel, chart, and breakdown table",
+    "page": "Metrics",
+    "ui_details": "Header: 'Bounce rate' label + percentage + info chevron icon. Info panel (dialog): 'How Bounce Rate Works' title, close button, explanation of bounce types (Permanent/hard, Transient/soft, Undetermined), risk level warning (>4% may pause sending), formula display, useful article links. SVG chart with 0-8% Y-axis. Breakdown table: Transient, Permanent, Undetermined rows with percentages. Each row label links to /emails?statuses=bounced&startDate=...&endDate=...",
+    "behavior": "Clicking info chevron opens slide-in info dialog. Close button or Escape dismisses it. Breakdown row links navigate to Emails page with pre-applied bounced status + date range filters. Chart shows daily bounce rate.",
+    "data_model": "Bounce rate = (permanent + transient + undetermined) / sent * 100. Bounce types: permanent (hard bounce), transient (soft bounce), undetermined.",
+    "priority": 16,
+    "core": false,
+    "passes": false,
+    "tests": {
+      "unit": [
+        {
+          "name": "calculates bounce rate correctly",
+          "description": "Bounce rate formula sums all bounce types",
+          "input": "{ permanent: 2, transient: 1, undetermined: 1, sent: 100 }",
+          "expected_output": "4%"
+        }
+      ],
+      "e2e": [
+        {
+          "name": "open and close bounce rate info panel",
+          "steps": [
+            "Navigate to /metrics",
+            "Click bounce rate info chevron",
+            "Verify 'How Bounce Rate Works' dialog opens",
+            "Click close button",
+            "Verify dialog closes"
+          ],
+          "expected": "Info dialog shows explanation, formula, and article links. Closes on X or Escape."
+        }
+      ],
+      "edge_cases": [
+        {
+          "name": "bounce breakdown links include correct date filters",
+          "steps": ["Set date range to 'Last 7 days'", "Click 'Transient' link in bounce breakdown"],
+          "expected": "Navigates to /emails with statuses=bounced and correct startDate/endDate params"
+        }
+      ]
+    }
+  },
+  {
+    "id": "feature-039",
+    "category": "data",
+    "description": "Complain Rate section with info panel, chart, and breakdown table",
+    "page": "Metrics",
+    "ui_details": "Header: 'Complain rate' label + percentage + info chevron. Info panel similar to bounce rate (explains complaints, risk levels). SVG chart with 0-0.2% Y-axis scale. Breakdown table: single 'Complained' row with percentage. Row label links to /emails?statuses=complained&startDate=...&endDate=...",
+    "behavior": "Same pattern as bounce rate: info chevron opens explanatory dialog, breakdown link navigates to filtered emails view.",
+    "data_model": "Complain rate = complaints / sent * 100. Single category: complained.",
+    "priority": 16,
+    "core": false,
+    "passes": false,
+    "tests": {
+      "unit": [
+        {
+          "name": "calculates complain rate correctly",
+          "description": "Complain rate formula",
+          "input": "{ complaints: 1, sent: 1000 }",
+          "expected_output": "0.1%"
+        }
+      ],
+      "e2e": [
+        {
+          "name": "complained link navigates to filtered emails",
+          "steps": [
+            "Navigate to /metrics",
+            "Click 'Complained' link in complain rate breakdown",
+            "Verify navigation to /emails with correct filters"
+          ],
+          "expected": "Redirects to /emails?statuses=complained&startDate=...&endDate=..."
+        }
+      ],
+      "edge_cases": [
+        {
+          "name": "zero complain rate display",
+          "steps": ["View metrics with no complaints"],
+          "expected": "Shows '0%' for complain rate, chart shows flat zero line"
+        }
+      ]
+    }
   }
 ]

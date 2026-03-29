@@ -798,6 +798,57 @@ contact.created, contact.updated, contact.deleted
 - No detail page for webhooks — management is done inline from the list
 - No checkboxes on the table (unlike Emails, Broadcasts, Domains, API Keys)
 
+### 6.22 Metrics Page (`/metrics`)
+
+**Layout**: Page title "Metrics" + domain combobox + date range picker → 3 collapsible metric sections, each with summary stat + chart + breakdown table
+
+**Header Filters** (top of page, right of title):
+1. **Domain filter** (combobox, default "All Domains") — options:
+   - All Domains (with generic icon)
+   - Individual verified domains (with region flag icon, e.g., `us-east-1`)
+2. **Date range picker** (button, default "Last 15 days") — same shared component:
+   - 6 presets: Today, Yesterday, Last 3 days, Last 7 days, Last 15 days, Last 30 days
+   - Calendar month view with range selection
+
+**Section 1: Deliverability Rate**
+- **Summary row**: "Emails" label + total count (e.g., "3") | "Deliverability Rate" label + percentage (e.g., "100%")
+- **Event type filter** (dropdown menu button, default "All Events") — `aria-haspopup="menu"`, 10 options:
+  - All Events (with checkmark when selected) + separator
+  - Received, Delivered, Opened, Clicked, Bounced, Complained, Unsubscribed, Delivery Delayed, Failed, Suppressed
+- **Chart**: SVG bar/line chart with date axis (daily granularity, e.g., "Mar, 15", "Mar, 16"...)
+- **Domain breakdown table**: domain name + deliverability percentage button (expandable tooltip)
+
+**Section 2: Bounce Rate**
+- **Header**: "Bounce rate" label + percentage (e.g., "0%") + info chevron (expandable)
+- **Info panel** (opens on chevron click — slide-in dialog):
+  - Title: "How Bounce Rate Works"
+  - Close button (X)
+  - Explanation: types of bounces (Permanent/hard, Transient/soft, Undetermined)
+  - Risk level: >4% bounce rate may pause sending
+  - Formula: `Bounce Rate = (Permanent + Transient + Undetermined Bounces) / Emails Sent x 100`
+  - Useful articles links: "Tips to reduce bounces", "Email Bounces"
+- **Chart**: SVG chart with 0-8% Y-axis scale
+- **Breakdown table**: 3 rows — Transient, Permanent, Undetermined
+  - Each label is a link to `/emails?statuses=bounced&startDate=...&endDate=...` (filtered emails view)
+  - Each with percentage value
+
+**Section 3: Complain Rate**
+- **Header**: "Complain rate" label + percentage (e.g., "0%") + info chevron (expandable, similar to bounce rate)
+- **Chart**: SVG chart with 0-0.2% Y-axis scale
+- **Breakdown table**: 1 row — Complained
+  - Link to `/emails?statuses=complained&startDate=...&endDate=...`
+
+**Footer**: "Data is updated every 15 minutes. Last updated [time]."
+
+**Key observations**:
+- No search bar, no table, no pagination — this is a charts/analytics page, not a list page
+- No API drawer button (unlike most other resource pages)
+- Charts use SVG `<svg role="application">` with responsive scaling
+- Bounce/complain rate sections have expandable info panels explaining the metric, risk levels, formulas
+- Breakdown rows link to the Emails page with pre-applied status + date filters
+- 10 deliverability event types (fewer than the 17 webhook event types — these are display-only metrics events, not webhook subscriptions)
+- Data refreshes every 15 minutes (not real-time)
+
 ## 7. Design System — PARTIAL (needs more deep dives)
 
 ### Layout
