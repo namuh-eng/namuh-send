@@ -86,10 +86,10 @@ This is your **source of truth** — the clone should match the original's behav
     }
     ```
 11. If bugs are found:
-    - Fix the bug directly in source code
-    - Re-test to confirm the fix works
-    - Run `make check && make test` after every code change
-    - Commit the fix: `git commit -m "fix: <description>"`
+    - Fix ALL bugs for this feature before committing (batch fixes, don't commit per bug)
+    - After fixing all bugs, run `make check && make test && make test-e2e` once
+    - If any test fails, fix and re-run until all green
+    - Commit all fixes together: `git commit -m "QA fix: <feature> — fixed N bugs: <brief list>"`
 12. Update `qa-progress.txt` with what you tested and results.
 13. **Commit and push:**
     - `git add -A`
