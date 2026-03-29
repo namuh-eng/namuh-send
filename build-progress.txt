@@ -654,3 +654,35 @@
 - tests/domain-config.test.tsx — 10 new unit tests for Configuration tab
 - tests/domain-detail.test.tsx — Updated tls fixture from boolean to string
 - tests/domain-dns-records.test.tsx — Updated tls fixture from boolean to string
+
+## Iteration 22 — feature-006: API Code Drawer (2026-03-29)
+
+### What was built
+- Shared `ApiCodeDrawer` component — slide-in panel from right with language tabs and syntax-highlighted code examples
+- Supports 9 API contexts: emails, domains, webhooks, api-keys, contacts, broadcasts, templates, segments, topics
+- Language tabs: Node.js and cURL (per spec: TypeScript/Node.js only for clone)
+- Each context has multiple code sections with real SDK usage examples (e.g., emails: Send Email, Send Batch Emails, Retrieve Email, Update Email)
+- Copy-to-clipboard button on each code block with success feedback
+- Close via X button, Escape key, or clicking outside
+- Reusable `ApiDrawerButton` trigger component (code brackets icon)
+- Uses native `<dialog>` element for accessibility (Biome lint compliance)
+- Integrated into EmailsHeader component (emails sending/receiving pages)
+- Domain detail page already had placeholder button — component ready for wiring
+
+### Test results
+- 9 new unit tests passing (LANGUAGE_TABS, getCodeSections for all contexts, code structure validation)
+- 2 new E2E tests (open/close drawer, Escape key close)
+- 270 total tests passing (22 test files), no regressions
+- make check: typecheck + lint passing
+
+### Decisions
+- Only Node.js and cURL tabs (not 9 languages) per clone spec — TypeScript/Node.js only
+- Used `<dialog>` element instead of `<div role="dialog">` to satisfy Biome accessibility lint rule
+- Code examples use Resend SDK patterns matching the original product's API surface
+- Drawer is a shared component that can be used on any page by passing the `context` prop
+
+### Files changed
+- src/components/api-code-drawer.tsx — New shared API code drawer component with all code examples
+- src/components/emails-header.tsx — Integrated ApiDrawerButton + ApiCodeDrawer
+- tests/api-code-drawer.test.ts — 9 unit tests for code examples data
+- tests/e2e/api-code-drawer.spec.ts — 2 E2E tests for drawer open/close behavior

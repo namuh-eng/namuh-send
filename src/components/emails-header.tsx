@@ -1,5 +1,6 @@
 "use client";
 
+import { ApiCodeDrawer, ApiDrawerButton } from "@/components/api-code-drawer";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -14,6 +15,7 @@ const tabs = [
 
 export function EmailsHeader({ activeTab }: EmailsHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -55,37 +57,45 @@ export function EmailsHeader({ activeTab }: EmailsHeaderProps) {
             );
           })}
         </div>
-        <div className="relative" ref={menuRef}>
-          <button
-            type="button"
-            aria-label="More actions"
-            className="p-1.5 rounded hover:bg-[rgba(24,25,28,0.5)] text-[#A1A4A5] hover:text-[#F0F0F0] transition-colors"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="currentColor"
-              aria-hidden="true"
+        <div className="flex items-center gap-2">
+          <ApiDrawerButton onClick={() => setDrawerOpen(true)} />
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              aria-label="More actions"
+              className="p-1.5 rounded hover:bg-[rgba(24,25,28,0.5)] text-[#A1A4A5] hover:text-[#F0F0F0] transition-colors"
+              onClick={() => setMenuOpen(!menuOpen)}
             >
-              <circle cx="8" cy="3" r="1.5" />
-              <circle cx="8" cy="8" r="1.5" />
-              <circle cx="8" cy="13" r="1.5" />
-            </svg>
-          </button>
-          {menuOpen && (
-            <div className="absolute right-0 top-full mt-1 min-w-[160px] bg-[rgba(24,25,28,0.88)] border border-[rgba(176,199,217,0.145)] rounded-[8px] py-1 z-10">
-              <a
-                href="/docs"
-                className="block px-3 py-2 text-[13px] text-[#A1A4A5] hover:text-[#F0F0F0] hover:bg-[rgba(176,199,217,0.1)] transition-colors"
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                aria-hidden="true"
               >
-                Go to docs
-              </a>
-            </div>
-          )}
+                <circle cx="8" cy="3" r="1.5" />
+                <circle cx="8" cy="8" r="1.5" />
+                <circle cx="8" cy="13" r="1.5" />
+              </svg>
+            </button>
+            {menuOpen && (
+              <div className="absolute right-0 top-full mt-1 min-w-[160px] bg-[rgba(24,25,28,0.88)] border border-[rgba(176,199,217,0.145)] rounded-[8px] py-1 z-10">
+                <a
+                  href="/docs"
+                  className="block px-3 py-2 text-[13px] text-[#A1A4A5] hover:text-[#F0F0F0] hover:bg-[rgba(176,199,217,0.1)] transition-colors"
+                >
+                  Go to docs
+                </a>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+      <ApiCodeDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        context="emails"
+      />
     </div>
   );
 }
