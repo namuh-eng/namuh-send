@@ -1,7 +1,8 @@
 "use client";
 
+import { AddContactModal } from "@/components/add-contact-modal";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 const TABS = [
@@ -23,7 +24,9 @@ interface AudienceLayoutProps {
 export function AudienceLayout({ stats, children }: AudienceLayoutProps) {
   const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -75,7 +78,10 @@ export function AudienceLayout({ stats, children }: AudienceLayoutProps) {
               <button
                 type="button"
                 className="w-full text-left px-3 py-2 text-[13px] text-[#F0F0F0] hover:bg-[rgba(176,199,217,0.1)] transition-colors"
-                onClick={() => setDropdownOpen(false)}
+                onClick={() => {
+                  setDropdownOpen(false);
+                  setAddModalOpen(true);
+                }}
               >
                 Add manually
               </button>
@@ -153,6 +159,12 @@ export function AudienceLayout({ stats, children }: AudienceLayoutProps) {
 
       {/* Tab content */}
       {children}
+
+      <AddContactModal
+        open={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        onSuccess={() => router.refresh()}
+      />
     </div>
   );
 }

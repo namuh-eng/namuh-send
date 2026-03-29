@@ -1,7 +1,57 @@
 import { db } from "@/lib/db";
 import { contactSegments, contacts, segments } from "@/lib/db/schema";
 import { desc, eq, ilike, or } from "drizzle-orm";
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { emails, segment_ids } = body as {
+      emails: string[];
+      segment_ids?: string[];
+    };
+
+    if (!emails || !Array.isArray(emails) || emails.length === 0) {
+      return NextResponse.json(
+        { error: "emails array is required" },
+        { status: 400 },
+      );
+    }
+
+    const created: string[] = [];
+
+    for (const email of emails) {
+      const trimmed = email.trim().toLowerCase();
+      if (!trimmed) continue;
+
+      const [inserted] = await db
+        .insert(contacts)
+        .values({ email: trimmed })
+        .returning({ id: contacts.id });
+
+      if (inserted) {
+        created.push(inserted.id);
+
+        if (segment_ids && segment_ids.length > 0) {
+          await db.insert(contactSegments).values(
+            segment_ids.map((segId) => ({
+              contactId: inserted.id,
+              segmentId: segId,
+            })),
+          );
+        }
+      }
+    }
+
+    return NextResponse.json({ created: created.length, ids: created });
+  } catch (error) {
+    console.error("Failed to create contacts:", error);
+    return NextResponse.json(
+      { error: "Failed to create contacts" },
+      { status: 500 },
+    );
+  }
+}
 
 export async function GET(request: Request) {
   const url = new URL(request.url);

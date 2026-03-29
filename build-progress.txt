@@ -755,3 +755,32 @@
 - src/app/(dashboard)/audience/page.tsx — Updated to use ContactsList
 - tests/contacts-list.test.ts — 8 unit tests
 - tests/e2e/contacts-list.spec.ts — 4 E2E tests
+
+## Iteration 24 — feature-018: Add Contact Modal (2026-03-29)
+
+### What was built
+- AddContactModal component with email textarea (comma/newline separated) and segments autocomplete
+- POST /api/contacts endpoint for creating contacts with optional segment assignment
+- GET /api/segments endpoint for listing all segments (used by autocomplete)
+- Wired modal into AudienceLayout via "Add contacts" → "Add manually" dropdown
+- Modal features: email textarea, segment search/select with tags, Add/Cancel/X buttons, Escape to close
+
+### Test results
+- 13 new unit tests passing (modal rendering, open/close, email parsing, submission, segment selection)
+- 5 new E2E tests (open modal, add contact, cancel, close X, segments field)
+- 299 total unit tests passing, no regressions
+- make check: typecheck + lint passing
+
+### Decisions
+- Segments fetched on modal open via /api/segments endpoint
+- Email parsing splits on commas and newlines, trims and lowercases
+- POST endpoint creates contacts one-by-one and assigns segments in batch per contact
+- Modal resets state on open (clears emails and selected segments)
+
+### Files changed
+- src/components/add-contact-modal.tsx — New modal component
+- src/components/audience-layout.tsx — Added modal state and trigger from "Add manually" button
+- src/app/api/contacts/route.ts — Added POST handler for creating contacts
+- src/app/api/segments/route.ts — New GET endpoint for listing segments
+- tests/add-contact-modal.test.tsx — 13 unit tests
+- tests/e2e/add-contact-modal.spec.ts — 5 E2E tests
