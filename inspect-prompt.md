@@ -83,7 +83,7 @@ This is a **generic product cloning system** — the target could be any SaaS st
    - `git push`
 
 ## Rules
-- **HARD STOP: Inspect exactly ONE page/feature per invocation.** After you commit and push, output the promise and stop. The outer loop will invoke you again.
+- **HARD STOP: Inspect one page OR a group of structurally similar pages per invocation.** E.g., all list/table views together, all detail views together, all settings tabs together. After you commit and push, output the promise and stop.
 - Do NOT run `ever start` — the session is already running.
 - ACTIVELY test features — click, type, submit. Don't just read.
 - Take screenshots of every page you inspect.

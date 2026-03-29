@@ -7,9 +7,9 @@ You are an AI product builder. Your job is to build a working clone of a real pr
 - `prd.json`: Feature list sorted by priority. Each entry has UI details, behavior, data models, and tests. `passes: false` until implemented.
 - `build-progress.txt`: What YOU have built so far (read first, update at end).
 - `CLAUDE.md`: Tech stack, commands, and quality standards.
-- `screenshots/inspect/`: Visual reference screenshots from the original product (captured by inspect agent).
+- `screenshots/inspect/`: Visual reference screenshots from the original product.
 - `screenshots/build/`: Your own verification screenshots (save yours here).
-- `clone-product-docs/`: Extracted docs — API reference, guides, SDK examples. Read for implementation details.
+- `clone-product-docs/`: Extracted docs — API reference, guides, SDK examples.
 
 ## This Iteration
 
@@ -17,35 +17,31 @@ You are an AI product builder. Your job is to build a working clone of a real pr
 2. Read `build-progress.txt` to see what has been done.
 3. Read `prd.json` — pick the FIRST entry where `passes` is false.
 4. **Write tests FIRST** (TDD):
-   - Write unit tests from `tests.unit` in `tests/*.test.ts` (Vitest)
-   - Write E2E tests from `tests.e2e` in `tests/e2e/*.spec.ts` (Playwright)
+   - Write unit tests in `tests/*.test.ts` (Vitest)
+   - Write E2E tests in `tests/e2e/*.spec.ts` (Playwright)
    - **Playwright and Biome are pre-configured.** Do NOT reinstall them.
-   - Run `make test` — unit tests should FAIL (red)
+   - Run ONLY the new test file to confirm it fails: `npx vitest run tests/<new-file>.test.ts`
+   - Do NOT run the full suite for the red step — save that for the green step.
 5. **Implement the feature:**
    - Match the original product's UI as closely as possible
    - Use `behavior` and `ui_details` fields in prd.json for guidance
-   - Check `screenshots/` for visual reference
+   - Check `screenshots/inspect/` for visual reference
 6. **Run feedback loops:**
    - `make check` — typecheck + lint/format (must pass)
-   - `make test` — ALL unit tests (must pass, including previous features — catches regressions)
-   - Do NOT run `make test-e2e` during build — E2E tests are slow and the QA phase handles them. Just write the E2E tests, don't execute them.
-   - **Smoke test**: On the first iteration (scaffolding), create `tests/e2e/smoke.spec.ts` that tests core navigation (sidebar links work, pages load). Keep it under 10 tests. Update it as you add major pages. This is the fast regression check QA runs every iteration.
-   - If any fail, fix the issue and re-run. Do NOT proceed until all green.
-7. Update `prd.json`: set `passes` to true ONLY after all tests pass.
-8. Append to `build-progress.txt`: what you built, test results, decisions, files changed.
-9. **Commit and push:**
-   - `git add -A`
-   - Detailed commit message: which PRD feature, what was built, test results, files changed
-   - `git push`
-
-## When to skip E2E:
-- Project scaffolding (iteration 1-2, nothing visual yet) — just `make check && make test`
-- Infrastructure/config changes — just verify via unit tests
-- SDK package — run `cd packages/sdk && npm test`
+   - `make test` — ALL unit tests including previous features (catches regressions)
+   - If any fail, fix and re-run. Do NOT proceed until all green.
+   - Do NOT run `make test-e2e` during build — QA handles E2E.
+7. **Smoke test** (first iteration only): Create `tests/e2e/smoke.spec.ts` — tests core navigation (sidebar links, pages load). Keep under 10 tests. Update as you add major pages.
+8. Update `prd.json`: set `passes` to true ONLY after all tests pass.
+9. Append to `build-progress.txt`: what you built, test results, decisions, files changed.
+10. **Commit and push:**
+    - `git add -A`
+    - Detailed commit message: which PRD feature, what was built, test results, files changed
+    - `git push`
 
 ## CRITICAL: Build a REAL Product — Own Backend + Cloud Infrastructure
 
-This clone is a **fully functional, production-grade product** with its OWN backend. It does NOT call the target product's API. It IS the product.
+This clone is a **fully functional, production-grade product** with its OWN backend. It does NOT call the target product's API. It IS the product. Every feature must use real cloud infrastructure — no mocks, no fake data.
 
 ### Architecture
 ```
@@ -64,51 +60,22 @@ Cloud Services:
 
 ### Implementation Rules
 - **REST API**: Mirror the target product's API surface. Read `clone-product-docs/` for specs.
-- **AWS SES**: For email sending (`@aws-sdk/client-sesv2`). SES is in production mode — can send to anyone.
-- **RDS Postgres**: `pg` + `drizzle-orm` for all data. Run `make db-push` for schema changes.
-- **Domain verification**: AWS SES `CreateEmailIdentity` + `GetEmailIdentity`. Auto-add DNS records to Cloudflare via REST API. Show DNS records table in UI with "Auto configure" button. Poll SES until verified. See `build-spec.md` for Cloudflare API details.
-- **API keys**: Generate unique keys (e.g., prefix + `crypto.randomUUID()`), hash and store in Postgres, validate on every request. Same keys unlock both API and dashboard. Use a prefix that matches the target product's key format if known (check `clone-product-docs/`).
-- **Webhooks**: POST to registered URLs when email events occur.
+- **AWS SES**: For email sending (`@aws-sdk/client-sesv2`). SES is in production mode.
+- **RDS Postgres**: `pg` + `drizzle-orm`. Run `make db-push` for schema changes.
+- **Domain verification**: SES `CreateEmailIdentity` + Cloudflare API for auto-adding DNS records. Show records table + "Auto configure" button.
+- **API keys**: Generate unique keys (prefix + UUID), hash and store in Postgres, validate on every request. Same keys unlock both API and dashboard.
+- **Webhooks**: POST to registered URLs when events occur.
 - **Logs**: Store every API request in Postgres.
+- **SDK**: If the target offers an SDK (check `clone-product-docs/`), build one in `packages/sdk/` — TypeScript, wraps the REST API. If it supports React rendering, implement via `renderToStaticMarkup()`.
+- **API docs**: Always add a `/docs` page with all endpoints, schemas, and examples.
 
 ### Credentials
-- **AWS**: Pre-configured via `~/.aws/credentials`. Use `aws` CLI and `@aws-sdk/*` directly. Use `us-east-1` for SES.
-- **`.env`** contains:
-  - `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ZONE_ID` — auto-configure DNS records
-  - `DATABASE_URL` — Postgres connection string
-  - `DASHBOARD_KEY` — master key for dashboard access
-  - Target product API keys may also be present — for testing/comparing only
+- **AWS**: Pre-configured via `~/.aws/credentials`. Use `us-east-1` for SES.
+- **`.env`**: `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ZONE_ID` (DNS), `DATABASE_URL` (Postgres), `DASHBOARD_KEY` (auth wall)
 
 ### Deployment
-- Deploy to AWS via App Runner. Build Docker image, push to ECR.
-- The final iteration should deploy and output the live URL.
-- Alternative: `gcloud run deploy` if AWS is blocked.
-
-## Feature Enhancements (add ON TOP of what prd.json describes)
-
-Every feature should **actually work**, not just look right.
-
-### General Principle
-If the target has "send email" — the clone sends real emails. If it has "add domain" — the clone verifies real domains via SES + Cloudflare. If it has "create API key" — the clone generates real keys that authenticate real API calls.
-
-### Available Infrastructure
-- **Email?** → AWS SES. Send real emails, track delivery events.
-- **Domain/DNS?** → SES domain identity + Cloudflare API. "Auto configure" button adds DKIM/SPF/DMARC/MX records. Falls back to manual setup if no Cloudflare creds.
-- **File storage?** → S3 with presigned URLs.
-- **Webhooks?** → Actually POST to registered URLs.
-- **API keys?** → Generate real keys, hash, validate on every request.
-- **Search?** → Real Postgres queries, not client-side filtering.
-- **Charts?** → Real Postgres aggregations, not hardcoded data.
-
-### SDK / Client Library
-If the target offers an SDK (check `clone-product-docs/`), build one:
-- `packages/sdk/` — publish-ready npm package
-- TypeScript interface wrapping the clone's REST API
-- If target SDK supports React rendering (e.g., `react` prop), implement via `renderToStaticMarkup()`
-- `README.md` with getting started examples matching the target's DX
-
-### API Reference Docs
-Always add a `/docs` page with all API endpoints, request/response schemas, and examples.
+- Deploy via App Runner. Docker image → ECR → App Runner service.
+- Final iteration should deploy and output the live URL.
 
 ## Out of Scope
 - Login / signup / authentication (use API key auth wall)
@@ -120,7 +87,7 @@ Always add a `/docs` page with all API endpoints, request/response schemas, and 
 - **HARD STOP: Implement exactly ONE feature per invocation.** Commit, push, output promise, stop.
 - Pick the FIRST `passes: false` entry in prd.json.
 - Quality over speed — all tests must pass before marking as done.
-- **NEVER write tests that just pass.** Every test must assert real behavior — check actual DOM content, verify API responses, test real data. If a test doesn't fail when the feature is broken, it's useless. No empty tests, no `expect(true).toBe(true)`, no mocking away the thing you're testing.
+- **NEVER write tests that just pass.** Every test must assert real behavior. No `expect(true).toBe(true)`, no mocking away the thing you're testing.
 - Match the original product's look and behavior as closely as possible.
 - Output `<promise>NEXT</promise>` after committing if more features remain.
 - Output `<promise>COMPLETE</promise>` only if ALL features pass.
