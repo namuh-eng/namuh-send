@@ -94,7 +94,7 @@ export const domains = pgTable("domains", {
     .defaultNow(),
   clickTracking: boolean("click_tracking").notNull().default(false),
   openTracking: boolean("open_tracking").notNull().default(false),
-  tls: boolean("tls").notNull().default(true),
+  tls: varchar("tls", { length: 20 }).notNull().default("opportunistic"),
   customReturnPath: varchar("custom_return_path", { length: 255 }),
   sendingEnabled: boolean("sending_enabled").notNull().default(true),
   receivingEnabled: boolean("receiving_enabled").notNull().default(false),

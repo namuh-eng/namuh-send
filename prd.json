@@ -849,7 +849,7 @@
     "data_model": "DomainConfiguration: click_tracking (boolean, default false), open_tracking (boolean, default false), tls ('opportunistic'|'enforced', default 'opportunistic')",
     "priority": 8,
     "core": false,
-    "passes": false,
+    "passes": true,
     "tests": {
       "unit": [
         {

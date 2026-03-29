@@ -18,7 +18,7 @@ const domainWithRecords: DomainDetailData = {
   createdAt: new Date(Date.now() - 20 * 60 * 60 * 1000).toISOString(),
   clickTracking: false,
   openTracking: false,
-  tls: true,
+  tls: "opportunistic",
   sendingEnabled: true,
   receivingEnabled: false,
   records: [

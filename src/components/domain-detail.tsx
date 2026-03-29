@@ -14,7 +14,7 @@ export interface DomainDetailData {
   createdAt: string;
   clickTracking: boolean;
   openTracking: boolean;
-  tls: boolean;
+  tls: string;
   sendingEnabled: boolean;
   receivingEnabled: boolean;
   records: Array<{
@@ -714,6 +714,7 @@ function ConfigurationTab({ domain }: { domain: DomainDetailData }) {
   const router = useRouter();
   const [clickTracking, setClickTracking] = useState(domain.clickTracking);
   const [openTracking, setOpenTracking] = useState(domain.openTracking);
+  const [tls, setTls] = useState(domain.tls || "opportunistic");
 
   const handleToggle = useCallback(
     async (field: "click_tracking" | "open_tracking", value: boolean) => {
@@ -725,12 +726,29 @@ function ConfigurationTab({ domain }: { domain: DomainDetailData }) {
         });
         router.refresh();
       } catch {
-        // revert on failure
         if (field === "click_tracking") setClickTracking(!value);
         else setOpenTracking(!value);
       }
     },
     [domain.id, router],
+  );
+
+  const handleTlsChange = useCallback(
+    async (value: string) => {
+      const prev = tls;
+      setTls(value);
+      try {
+        await fetch(`/api/domains/${domain.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tls: value }),
+        });
+        router.refresh();
+      } catch {
+        setTls(prev);
+      }
+    },
+    [domain.id, tls, router],
   );
 
   return (
@@ -752,6 +770,7 @@ function ConfigurationTab({ domain }: { domain: DomainDetailData }) {
           <button
             type="button"
             role="switch"
+            aria-label="Click Tracking"
             aria-checked={clickTracking}
             data-state={clickTracking ? "checked" : "unchecked"}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
@@ -788,6 +807,7 @@ function ConfigurationTab({ domain }: { domain: DomainDetailData }) {
           <button
             type="button"
             role="switch"
+            aria-label="Open Tracking"
             aria-checked={openTracking}
             data-state={openTracking ? "checked" : "unchecked"}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
@@ -805,6 +825,24 @@ function ConfigurationTab({ domain }: { domain: DomainDetailData }) {
               }`}
             />
           </button>
+        </div>
+
+        <div className="border-t border-[rgba(176,199,217,0.145)] pt-8">
+          <h3 className="text-[14px] font-semibold text-[#F0F0F0] mb-2">TLS</h3>
+          <p className="text-[13px] text-[#A1A4A5] mb-3 max-w-[600px]">
+            Opportunistic TLS attempts a secure connection but falls back to
+            unencrypted if unavailable. Enforced TLS requires a secure
+            connection and rejects delivery if TLS is not supported.
+          </p>
+          <select
+            data-testid="tls-select"
+            value={tls}
+            onChange={(e) => handleTlsChange(e.target.value)}
+            className="appearance-none bg-[rgba(24,25,28,0.88)] border border-[rgba(176,199,217,0.145)] rounded-lg px-3 py-2 text-[14px] text-[#F0F0F0] focus:outline-none focus:border-[rgba(176,199,217,0.3)] cursor-pointer min-w-[200px]"
+          >
+            <option value="opportunistic">Opportunistic</option>
+            <option value="enforced">Enforced</option>
+          </select>
         </div>
       </div>
     </div>

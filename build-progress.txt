@@ -625,3 +625,32 @@
 - tests/domain-dns-records.test.tsx — 13 unit tests for DNS Records tab
 - tests/e2e/domain-dns-records.spec.ts — E2E test for DNS Records tab
 - tests/domain-detail.test.tsx — Updated baseDomain fixture with sendingEnabled/receivingEnabled
+
+## Iteration 21 — feature-026: Domain Configuration Tab (2026-03-29)
+
+### What was built
+- TLS combobox added to ConfigurationTab with 2 options: Opportunistic (default) and Enforced
+- TLS description text explaining the difference between opportunistic and enforced modes
+- TLS select triggers PATCH /api/domains/:id with `{ tls: "opportunistic"|"enforced" }` on change
+- Added `aria-label` attributes to Click Tracking and Open Tracking toggle switches for accessibility
+- Updated schema: `tls` field changed from boolean to varchar(20) with default "opportunistic"
+- Updated PATCH API to validate and accept tls string values ("opportunistic" or "enforced")
+
+### Test results
+- 10 new unit tests passing (click tracking toggle, open tracking toggle with Not Recommended label, TLS combobox rendering, TLS 2 options validation, TLS description text, PATCH calls for all 3 settings, enforced value display, enabled toggle states)
+- 261 total tests passing (251 previous + 10 new), no regressions
+- make check: typecheck + lint passing
+
+### Decisions
+- Changed tls from boolean to varchar to support "opportunistic"/"enforced" string values per PRD spec
+- Used native HTML `<select>` element for TLS combobox (simple, accessible, matches dark theme styling)
+- Added aria-label to toggle switches so tests can query by accessible name
+- Auto-save on change (no submit button) matching existing click/open tracking pattern
+
+### Files changed
+- src/lib/db/schema.ts — tls field: boolean → varchar(20) default "opportunistic"
+- src/components/domain-detail.tsx — Added TLS combobox section, aria-labels on toggles, tls type boolean→string
+- src/app/api/domains/[id]/route.ts — Handle tls string field in PATCH with validation
+- tests/domain-config.test.tsx — 10 new unit tests for Configuration tab
+- tests/domain-detail.test.tsx — Updated tls fixture from boolean to string
+- tests/domain-dns-records.test.tsx — Updated tls fixture from boolean to string

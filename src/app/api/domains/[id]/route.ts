@@ -56,6 +56,12 @@ export async function PATCH(
     if (body.open_tracking !== undefined) {
       updates.openTracking = body.open_tracking;
     }
+    if (body.tls !== undefined) {
+      const val = body.tls;
+      if (val === "opportunistic" || val === "enforced") {
+        updates.tls = val;
+      }
+    }
     if (body.sending_enabled !== undefined) {
       updates.sendingEnabled = body.sending_enabled;
     }
