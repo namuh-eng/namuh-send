@@ -269,3 +269,35 @@
 - src/app/api/emails/batch/route.ts — POST batch send endpoint
 - src/app/api/emails/[id]/route.ts — GET single email with events
 - tests/api-emails.test.ts — 11 unit tests for all email API endpoints
+
+## Iteration 10 — feature-030: API Keys List Page (2026-03-29)
+
+### What was built
+- API Keys list page (`src/app/(dashboard)/api-keys/page.tsx`) — server component that fetches keys and domains from DB
+- `ApiKeysList` client component (`src/components/api-keys-list.tsx`) — full CRUD list page with:
+  - Page title "API Keys" + "Create API Key" button (matching Resend screenshot)
+  - Filter bar: SearchInput for name/token filtering, DropdownFilter for permissions (All Permissions, Full access, Sending access), ExportButton (CSV download)
+  - DataTable with 5 columns: Name (link to detail), Token (truncated re_xxx... monospace), Permission, Last Used, Created
+  - Checkbox column for bulk selection, three-dot row action menu with Delete
+  - Pagination (40/80/120 items per page)
+  - Empty state when no keys exist
+  - Create API Key modal: Name input, Permission select (Full access/Sending access), Domain select (All Domains + list)
+- GET /api/api-keys route — lists all API keys ordered by creation date
+- POST /api/api-keys route — creates new API key with re_ prefix, SHA-256 hashed storage, returns raw key once
+
+### Test results
+- 11 new unit tests passing (page title, columns, row data, permissions, search filter, permission filter, empty state, create modal, modal fields, checkboxes, action menu)
+- 156 total tests passing (145 previous + 11 new), no regressions
+- make check: typecheck + lint passing
+
+### Decisions
+- Used existing shared components (DataTable, SearchInput, DropdownFilter, ExportButton, Pagination, EmptyState, Modal)
+- API key generation: `re_` + UUID (no dashes), stored as SHA-256 hash, prefix shown as `re_xxxx...`
+- Dashboard API routes don't require API key auth (internal use), unlike public API endpoints
+- Relative time formatting for Last Used and Created columns matching Resend's "about X hours ago" style
+
+### Files changed
+- src/components/api-keys-list.tsx — ApiKeysList client component with all UI features
+- src/app/(dashboard)/api-keys/page.tsx — Server component fetching keys + domains
+- src/app/api/api-keys/route.ts — GET (list) and POST (create) API key endpoints
+- tests/api-keys-page.test.tsx — 11 unit tests for API Keys list page
