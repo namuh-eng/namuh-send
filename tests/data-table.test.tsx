@@ -191,38 +191,6 @@ describe("DataTable", () => {
   });
 
   it("sorts rows ascending and descending when a sortable header is clicked", () => {
-<<<<<<< HEAD
-    render(<DataTable columns={columns} rows={rows} getRowId={(r) => r.id} />);
-
-    const nameSortButton = screen.getByRole("button", { name: /Name/i });
-    const getFirstDataCell = () => screen.getAllByRole("cell")[0];
-
-    expect(getFirstDataCell().textContent).toBe("Item A");
-
-    fireEvent.click(nameSortButton);
-    expect(getFirstDataCell().textContent).toBe("Item A");
-    expect(
-      screen
-        .getByRole("columnheader", { name: /Name/i })
-        .getAttribute("aria-sort"),
-    ).toBe("ascending");
-
-    fireEvent.click(nameSortButton);
-    expect(getFirstDataCell().textContent).toBe("Item C");
-    expect(
-      screen
-        .getByRole("columnheader", { name: /Name/i })
-        .getAttribute("aria-sort"),
-    ).toBe("descending");
-
-    fireEvent.click(nameSortButton);
-    expect(getFirstDataCell().textContent).toBe("Item A");
-    expect(
-      screen
-        .getByRole("columnheader", { name: /Name/i })
-        .getAttribute("aria-sort"),
-    ).toBe("none");
-=======
     const unsortedRows = [rows[2], rows[0], rows[1]];
     render(
       <DataTable
@@ -261,6 +229,5 @@ describe("DataTable", () => {
         .getByRole("columnheader", { name: /Name/ })
         .getAttribute("aria-sort"),
     ).toBe("descending");
->>>>>>> origin/qa/design-001-data-table-20260329
   });
 });
