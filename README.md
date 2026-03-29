@@ -6,11 +6,11 @@ Give it any URL → It inspects, builds, tests, and deploys a working clone.
 
 ![Ralph-to-Ralph Architecture](docs/assets/architecture-diagram.png)
 
-### Powered by [Ever CLI](https://foreverbrowsing.com) — Our Browser Agent
+### Powered by [Ever](https://foreverbrowsing.com) — Our Browser Agent
 
-The first phase of every Ralph-to-Ralph loop is powered by **Ever CLI**, our own browser agent that autonomously navigates, screenshots, and deeply inspects any website — its docs, API reference, sitemap, and every interactive element. Ever CLI is what makes the entire pipeline possible.
+The first phase of every Ralph-to-Ralph loop is powered by **Ever**, our browser agent built as a Chrome extension, along with **Ever CLI** — a command-line tool we created for autonomous website inspection. Ever navigates, screenshots, and deeply inspects any website — its docs, API reference, sitemap, and every interactive element. It's what makes the entire pipeline possible.
 
-**[Sign up for the Ever CLI waitlist →](https://foreverbrowsing.com)**
+**[Try Ever → foreverbrowsing.com](https://foreverbrowsing.com)**
 
 ## What Is This?
 
