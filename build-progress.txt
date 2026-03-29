@@ -856,3 +856,30 @@
 - tests/properties.test.tsx — 7 unit tests
 - tests/e2e/properties.spec.ts — E2E test for create property flow
 - prd.json — feature-020 passes: true
+
+## Iteration 27 — feature-021: Segments List Table (2026-03-29)
+
+### What was built
+- Segments list component (`src/components/segments-list.tsx`) with search, pagination, checkbox selection
+- Data table with columns: Name (link to /audience?segmentId=:id), Contacts (count), Unsubscribed (count), Created (relative time)
+- Create segment modal with name input (placeholder "Your segment name"), Add + Cancel buttons
+- Enhanced API route (`src/app/api/segments/route.ts`) with GET (search, pagination, contacts/unsubscribed counts via subqueries) and POST (create segment)
+- Updated segments page to render SegmentsList component
+
+### Test results
+- 9 new unit tests passing (segments-list: renders rows, columns, empty state, create button, modal, links, search, POST, checkboxes)
+- 2 E2E tests written (create segment, click segment navigates to filtered contacts)
+- 321 total unit tests passing, no regressions
+- make check: typecheck + lint passing
+
+### Decisions
+- Used correlated subqueries for contacts_count and unsubscribed_count to avoid complex joins
+- Followed existing patterns from properties-list.tsx for consistent UI
+- Search filters by segment name using ilike
+
+### Files changed
+- src/components/segments-list.tsx — New: SegmentsList + CreateSegmentModal components
+- src/app/api/segments/route.ts — Enhanced: GET with search/pagination/counts, POST for creation
+- src/app/(dashboard)/audience/segments/page.tsx — Updated to use SegmentsList
+- tests/segments-list.test.ts — 9 unit tests
+- tests/e2e/segments.spec.ts — 2 E2E tests
