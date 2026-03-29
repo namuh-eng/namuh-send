@@ -1,0 +1,114 @@
+import { unauthorizedResponse, validateApiKey } from "@/lib/api-auth";
+import { db } from "@/lib/db";
+import { emailEvents, emails } from "@/lib/db/schema";
+import { sendEmail as sesSendEmail } from "@/lib/ses";
+
+interface BatchEmailBody {
+  from: string;
+  to: string | string[];
+  subject: string;
+  html?: string;
+  text?: string;
+  cc?: string | string[];
+  bcc?: string | string[];
+  reply_to?: string | string[];
+  tags?: Array<{ name: string; value: string }>;
+}
+
+function normalizeToArray(
+  value: string | string[] | undefined,
+): string[] | undefined {
+  if (!value) return undefined;
+  return Array.isArray(value) ? value : [value];
+}
+
+export async function POST(request: Request): Promise<Response> {
+  const auth = await validateApiKey(request.headers.get("authorization"));
+  if (!auth) return unauthorizedResponse();
+
+  let body: BatchEmailBody[];
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  if (!Array.isArray(body)) {
+    return Response.json(
+      { error: "Body must be an array of emails" },
+      { status: 400 },
+    );
+  }
+
+  if (body.length > 100) {
+    return Response.json(
+      { error: "Maximum 100 emails per batch request" },
+      { status: 400 },
+    );
+  }
+
+  try {
+    const results: Array<{ id: string }> = [];
+
+    for (const item of body) {
+      const to = normalizeToArray(item.to) as string[];
+      const cc = normalizeToArray(item.cc);
+      const bcc = normalizeToArray(item.bcc);
+      const replyTo = normalizeToArray(item.reply_to);
+
+      if (
+        !item.from ||
+        !item.to ||
+        !item.subject ||
+        (!item.html && !item.text)
+      ) {
+        return Response.json(
+          { error: "Each email must have from, to, subject, and html or text" },
+          { status: 422 },
+        );
+      }
+
+      const sesResult = await sesSendEmail({
+        from: item.from,
+        to,
+        cc,
+        bcc,
+        subject: item.subject,
+        html: item.html,
+        text: item.text,
+        replyTo,
+      });
+
+      const [email] = await db
+        .insert(emails)
+        .values({
+          from: item.from,
+          to,
+          cc: cc ?? null,
+          bcc: bcc ?? null,
+          replyTo: replyTo?.[0] ?? null,
+          subject: item.subject,
+          html: item.html ?? null,
+          text: item.text ?? null,
+          tags: item.tags ?? null,
+          lastEvent: "sent",
+          apiKeyId: auth.apiKeyId,
+          sesMessageId: sesResult.id,
+        })
+        .returning({ id: emails.id });
+
+      await db.insert(emailEvents).values({
+        emailId: email.id,
+        type: "sent",
+      });
+
+      results.push({ id: email.id });
+    }
+
+    return Response.json({ data: results });
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to send batch emails";
+    return Response.json({ error: message }, { status: 500 });
+  }
+}

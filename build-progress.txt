@@ -240,3 +240,32 @@
 - src/components/toggle.tsx — Toggle switch with accessible role
 - src/components/empty-state.tsx — Empty state with title, description, action
 - tests/ui-primitives.test.tsx — 30 unit tests for all 8 UI primitives
+
+## Iteration 9 — api-001: Email Sending REST API (2026-03-29)
+
+### What was built
+- API key authentication middleware (`src/lib/api-auth.ts`) — validates Bearer token by SHA-256 hashing and looking up in DB
+- POST /api/emails — sends single email via SES, stores in DB with events, returns `{ id }`. Supports from, to (string or array), subject, html, text, cc, bcc, reply_to, headers, attachments, tags, scheduled_at
+- POST /api/emails/batch — sends up to 100 emails in one request, validates each email, returns `{ data: [{ id }] }`. Rejects >100 with 400 error
+- GET /api/emails — lists emails with cursor pagination (limit, after, before params), returns `{ object: "list", has_more, data }` matching Resend API format
+- GET /api/emails/:id — returns single email with events, `{ object: "email", ... }` format with snake_case field names
+- Input validation: 422 for missing required fields (from, to, subject, html/text), 401 for missing/invalid API key
+- String `to` field auto-normalized to array for API compatibility
+
+### Test results
+- 11 new unit tests passing (auth: 2, POST send: 4, POST batch: 2, GET list: 1, GET detail: 2)
+- 145 total tests passing (134 previous + 11 new), no regressions
+- make check: typecheck + lint passing
+
+### Decisions
+- Mocked `api-auth` module in tests to bypass real DB auth, testing auth separately via route-level 401 checks
+- Used `vi.hoisted()` pattern for mock setup consistent with existing test patterns
+- API response format matches Resend API exactly: snake_case fields, `object` type field, cursor pagination with `has_more`
+- normalizeToArray helper handles both string and array inputs for to/cc/bcc/reply_to fields
+
+### Files changed
+- src/lib/api-auth.ts — API key validation middleware (SHA-256 hash lookup)
+- src/app/api/emails/route.ts — POST (send) and GET (list) email endpoints
+- src/app/api/emails/batch/route.ts — POST batch send endpoint
+- src/app/api/emails/[id]/route.ts — GET single email with events
+- tests/api-emails.test.ts — 11 unit tests for all email API endpoints
