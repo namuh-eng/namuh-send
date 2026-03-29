@@ -49,5 +49,69 @@
       "Wrapped the API Keys server-page data load in a try/catch and fell back to empty key/domain lists so the page still renders the layout shell and empty state when the database is unavailable.",
       "Strengthened tests/e2e/smoke.spec.ts so the sidebar persistence flow now verifies the /api-keys URL and the exact API Keys heading."
     ]
+  },
+  {
+    "feature_id": "feature-013",
+    "status": "pass",
+    "category": "templates",
+    "tested_steps": [
+      "Re-ran tests/e2e/templates-list.spec.ts against an isolated QA server using baseURL=http://localhost:3215 so client-side behavior matched normal Next dev hydration.",
+      "Cleaned up stale 'E2E Test Template' rows left behind by aborted test runs so the template-card locator matched a single record again.",
+      "Confirmed the Templates list shows the created template card, clicking that card navigates to /templates/:id/editor, and the Create template button opens a new editor session."
+    ],
+    "bugs_found": [],
+    "fixes_applied": []
+  },
+  {
+    "feature_id": "feature-016",
+    "status": "pass",
+    "category": "audience",
+    "tested_steps": [
+      "Re-ran tests/e2e/audience-layout.spec.ts against the isolated QA server with baseURL=http://localhost:3215.",
+      "Confirmed the Audience page loads, the 4-tab layout renders, direct navigation between Contacts, Properties, Segments, and Topics works, and the Add contacts trigger reveals Add manually and Import CSV.",
+      "Verified the apparent ALL CONTACTS failure was a selector ambiguity because the stat card text and the All contacts combobox option both matched the same Playwright query."
+    ],
+    "bugs_found": [],
+    "fixes_applied": []
+  },
+  {
+    "feature_id": "feature-017",
+    "status": "partial",
+    "category": "audience",
+    "tested_steps": [
+      "Ran tests/e2e/contacts-list.spec.ts against the isolated QA server with baseURL=http://localhost:3215.",
+      "Verified the Audience contacts page renders the search, segment filter, status filter, and export controls.",
+      "Independently checked the current dataset on /audience and confirmed the page reaches a stable No contacts found empty state."
+    ],
+    "bugs_found": [
+      {
+        "severity": "minor",
+        "description": "The stock Playwright test uses an invalid selector string for the contacts empty-state wait.",
+        "expected": "The test should wait using a valid Playwright locator strategy so QA can distinguish product bugs from test harness bugs.",
+        "actual": "page.waitForSelector('table, text=No contacts found') fails immediately because Playwright parses it as invalid CSS.",
+        "reproduction": "Run npx playwright test tests/e2e/contacts-list.spec.ts against the current app; the failing cases abort on the malformed selector before any product assertion runs."
+      }
+    ],
+    "fixes_applied": []
+  },
+  {
+    "feature_id": "deploy-001",
+    "status": "partial",
+    "category": "settings",
+    "tested_steps": [
+      "Created an isolated QA worktree ../ralph-to-ralph-3-qa-20260329-171503 on branch qa/20260329-171503-topdown and rebased it onto main before branch-local verification.",
+      "Initial isolated Playwright boot on port 3215 failed because the fresh worktree did not have the documented local env vars.",
+      "Copying .env from a sibling configured checkout unblocked isolated smoke and deeper feature QA."
+    ],
+    "bugs_found": [
+      {
+        "severity": "major",
+        "description": "Fresh isolated QA worktrees do not inherit the documented local env bootstrap, so branch-local dev servers fail until secrets are copied in manually.",
+        "expected": "A new QA branch/worktree should have a documented, repeatable way to load the required local env vars before running branch-local QA.",
+        "actual": "The isolated QA worktree started with no DATABASE_URL in shell or local env files. npx next dev --port 3215 initially crashed data-backed pages until .env was copied from another local checkout.",
+        "reproduction": "Create a fresh worktree from this repo, run npm ci, then start npx next dev --port 3215 before copying any env file. Data-backed pages fail until secrets are bootstrapped manually."
+      }
+    ],
+    "fixes_applied": []
   }
 ]
