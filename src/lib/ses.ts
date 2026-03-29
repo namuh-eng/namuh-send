@@ -1,9 +1,9 @@
 import {
+  CreateEmailIdentityCommand,
+  DeleteEmailIdentityCommand,
+  GetEmailIdentityCommand,
   SESv2Client,
   SendEmailCommand,
-  CreateEmailIdentityCommand,
-  GetEmailIdentityCommand,
-  DeleteEmailIdentityCommand,
 } from "@aws-sdk/client-sesv2";
 
 // ── Types ──────────────────────────────────────────────────────────
@@ -42,11 +42,14 @@ const ses = new SESv2Client({ region: "us-east-1" });
 
 // ── Email Sending ──────────────────────────────────────────────────
 
-export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
+export async function sendEmail(
+  input: SendEmailInput,
+): Promise<SendEmailResult> {
   if (!input.from) throw new Error("from is required");
   if (!input.to || input.to.length === 0) throw new Error("to is required");
   if (!input.subject) throw new Error("subject is required");
-  if (!input.html && !input.text) throw new Error("html or text body is required");
+  if (!input.html && !input.text)
+    throw new Error("html or text body is required");
 
   // Build raw MIME message if attachments present
   if (input.attachments && input.attachments.length > 0) {
@@ -75,11 +78,18 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
       Simple: {
         Subject: { Data: input.subject, Charset: "UTF-8" },
         Body: {
-          ...(input.html ? { Html: { Data: input.html, Charset: "UTF-8" } } : {}),
-          ...(input.text ? { Text: { Data: input.text, Charset: "UTF-8" } } : {}),
+          ...(input.html
+            ? { Html: { Data: input.html, Charset: "UTF-8" } }
+            : {}),
+          ...(input.text
+            ? { Text: { Data: input.text, Charset: "UTF-8" } }
+            : {}),
         },
         Headers: input.headers
-          ? Object.entries(input.headers).map(([Name, Value]) => ({ Name, Value }))
+          ? Object.entries(input.headers).map(([Name, Value]) => ({
+              Name,
+              Value,
+            }))
           : undefined,
       },
     },
@@ -91,7 +101,9 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
 
 // ── Domain Identity Management ─────────────────────────────────────
 
-export async function createDomainIdentity(domain: string): Promise<CreateDomainResult> {
+export async function createDomainIdentity(
+  domain: string,
+): Promise<CreateDomainResult> {
   if (!domain) throw new Error("domain is required");
 
   const command = new CreateEmailIdentityCommand({
@@ -106,7 +118,9 @@ export async function createDomainIdentity(domain: string): Promise<CreateDomain
   };
 }
 
-export async function getDomainIdentity(domain: string): Promise<GetDomainResult> {
+export async function getDomainIdentity(
+  domain: string,
+): Promise<GetDomainResult> {
   if (!domain) throw new Error("domain is required");
 
   const command = new GetEmailIdentityCommand({
@@ -143,7 +157,8 @@ function buildMimeMessage(input: SendEmailInput): string {
   if (input.cc?.length) lines.push(`Cc: ${input.cc.join(", ")}`);
   if (input.bcc?.length) lines.push(`Bcc: ${input.bcc.join(", ")}`);
   lines.push(`Subject: ${input.subject}`);
-  if (input.replyTo?.length) lines.push(`Reply-To: ${input.replyTo.join(", ")}`);
+  if (input.replyTo?.length)
+    lines.push(`Reply-To: ${input.replyTo.join(", ")}`);
   if (input.headers) {
     for (const [key, value] of Object.entries(input.headers)) {
       lines.push(`${key}: ${value}`);
@@ -170,9 +185,13 @@ function buildMimeMessage(input: SendEmailInput): string {
   // Attachments
   for (const attachment of input.attachments ?? []) {
     lines.push(`--${boundary}`);
-    lines.push(`Content-Type: application/octet-stream; name="${attachment.filename}"`);
+    lines.push(
+      `Content-Type: application/octet-stream; name="${attachment.filename}"`,
+    );
     lines.push("Content-Transfer-Encoding: base64");
-    lines.push(`Content-Disposition: attachment; filename="${attachment.filename}"`);
+    lines.push(
+      `Content-Disposition: attachment; filename="${attachment.filename}"`,
+    );
     lines.push("");
     lines.push(attachment.content);
   }

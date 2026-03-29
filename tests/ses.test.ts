@@ -1,7 +1,10 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Mock the AWS SES SDK
-const mockSend = vi.fn();
+// Mock the AWS SES SDK — vi.hoisted ensures mockSend is available during mock factory
+const { mockSend } = vi.hoisted(() => ({
+  mockSend: vi.fn(),
+}));
+
 vi.mock("@aws-sdk/client-sesv2", () => ({
   SESv2Client: vi.fn().mockImplementation(() => ({
     send: mockSend,
@@ -25,11 +28,11 @@ vi.mock("@aws-sdk/client-sesv2", () => ({
 }));
 
 import {
-  sendEmail,
-  createDomainIdentity,
-  getDomainIdentity,
-  deleteDomainIdentity,
   type SendEmailInput,
+  createDomainIdentity,
+  deleteDomainIdentity,
+  getDomainIdentity,
+  sendEmail,
 } from "@/lib/ses";
 
 describe("SES Client", () => {
@@ -120,9 +123,7 @@ describe("SES Client", () => {
         html: "<p>Hello</p>",
       } as SendEmailInput;
 
-      await expect(sendEmail(input)).rejects.toThrow(
-        "from is required",
-      );
+      await expect(sendEmail(input)).rejects.toThrow("from is required");
       expect(mockSend).not.toHaveBeenCalled();
     });
 
@@ -133,9 +134,7 @@ describe("SES Client", () => {
         html: "<p>Hello</p>",
       } as SendEmailInput;
 
-      await expect(sendEmail(input)).rejects.toThrow(
-        "to is required",
-      );
+      await expect(sendEmail(input)).rejects.toThrow("to is required");
       expect(mockSend).not.toHaveBeenCalled();
     });
 
@@ -147,9 +146,7 @@ describe("SES Client", () => {
         html: "<p>Hello</p>",
       };
 
-      await expect(sendEmail(input)).rejects.toThrow(
-        "to is required",
-      );
+      await expect(sendEmail(input)).rejects.toThrow("to is required");
     });
 
     it("throws validation error when subject is missing", async () => {
@@ -159,9 +156,7 @@ describe("SES Client", () => {
         html: "<p>Hello</p>",
       } as SendEmailInput;
 
-      await expect(sendEmail(input)).rejects.toThrow(
-        "subject is required",
-      );
+      await expect(sendEmail(input)).rejects.toThrow("subject is required");
     });
 
     it("throws validation error when no body provided", async () => {
@@ -186,9 +181,7 @@ describe("SES Client", () => {
         html: "<p>Hello</p>",
       };
 
-      await expect(sendEmail(input)).rejects.toThrow(
-        "SES rate limit exceeded",
-      );
+      await expect(sendEmail(input)).rejects.toThrow("SES rate limit exceeded");
     });
 
     it("sends email with attachments", async () => {
@@ -201,9 +194,7 @@ describe("SES Client", () => {
         to: ["user@example.com"],
         subject: "With Attachment",
         html: "<p>See attached</p>",
-        attachments: [
-          { filename: "test.txt", content: "SGVsbG8gV29ybGQ=" },
-        ],
+        attachments: [{ filename: "test.txt", content: "SGVsbG8gV29ybGQ=" }],
       };
 
       const result = await sendEmail(input);
