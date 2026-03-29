@@ -59,8 +59,6 @@ scripts/           — Infrastructure and deploy scripts
 
 ## Target Product Login (if session expires)
 If the target product (e.g., resend.com) logs you out during inspection:
-- Email: `jaeyunha@foreverbrowsing.com`
-- Password: `Janda0317!@#`
 - Use Ever CLI to log back in: `ever click` on sign-in fields, `ever input` credentials, submit.
 
 ## Port

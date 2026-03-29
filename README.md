@@ -133,6 +133,10 @@ await resend.emails.send({
 - **Jaeyun Ha** — [github.com/jaeyunha](https://github.com/jaeyunha)
 - **Ashley Ha** — [github.com/ashley-ha](https://github.com/ashley-ha)
 
+## Presentation
+
+[View the pitch deck (PDF)](ralph-to-ralph.pdf)
+
 ## Ralphthon Seoul 2026
 
 This project was built for [Ralphthon Seoul 2026](https://ralphthon.com) — a hackathon focused on building real products with AI agents.
