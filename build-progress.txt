@@ -23,3 +23,29 @@
 - drizzle.config.ts — Updated with SSL handling for RDS
 - drizzle/0000_fearless_boomer.sql — Generated migration
 - tests/schema.test.ts — 22 unit tests for schema validation
+
+## Iteration 2 — infra-002: AWS SES Email Sending Client (2026-03-29)
+
+### What was built
+- SES client wrapper (`src/lib/ses.ts`) around `@aws-sdk/client-sesv2`
+- `sendEmail()` — sends emails via SES with full support for: from, to, cc, bcc, subject, html, text, replyTo, headers, attachments
+- Input validation: rejects missing from, to, subject, or body before calling SES
+- Attachment support via raw MIME message builder (multipart/mixed with base64 attachments)
+- `createDomainIdentity()` — creates SES domain identity, returns DKIM tokens
+- `getDomainIdentity()` — checks domain verification status and DKIM info
+- `deleteDomainIdentity()` — removes a domain identity from SES
+- All functions use us-east-1 region as configured
+
+### Test results
+- 16 new unit tests passing (sendEmail: 10 tests, createDomainIdentity: 2, getDomainIdentity: 1, deleteDomainIdentity: 2, attachment: 1)
+- 38 total tests passing (22 schema + 16 SES), no regressions
+- make check: typecheck + lint passing
+
+### Decisions
+- Used `vi.hoisted()` for mock setup to handle Vitest module hoisting with top-level SES client instantiation
+- Attachment emails use raw MIME builder; simple emails use SES Simple content format
+- Validation errors thrown before any SES API call to fail fast
+
+### Files changed
+- src/lib/ses.ts — SES client with sendEmail, domain identity management, MIME builder
+- tests/ses.test.ts — 16 unit tests covering all functions and edge cases
