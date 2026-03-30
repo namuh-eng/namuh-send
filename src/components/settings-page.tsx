@@ -1,6 +1,7 @@
 "use client";
 
 import { CopyToClipboard } from "@/components/copy-to-clipboard";
+import { DocumentsTab } from "@/components/settings-documents";
 import { type UsageData, UsageTab } from "@/components/settings-usage";
 import { useEffect, useState } from "react";
 
@@ -29,9 +30,9 @@ const DEFAULT_USAGE: UsageData = {
 };
 
 export function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<"usage" | "smtp" | "unsubscribe">(
-    "usage",
-  );
+  const [activeTab, setActiveTab] = useState<
+    "usage" | "smtp" | "unsubscribe" | "documents"
+  >("usage");
   const [usage, setUsage] = useState<UsageData>(DEFAULT_USAGE);
 
   useEffect(() => {
@@ -55,6 +56,7 @@ export function SettingsPage() {
               { key: "usage", label: "Usage" },
               { key: "smtp", label: "SMTP" },
               { key: "unsubscribe", label: "Unsubscribe Page" },
+              { key: "documents", label: "Documents" },
             ] as const
           ).map((tab) => (
             <button
@@ -121,6 +123,9 @@ SMTP_PASS=re_YOUR_API_KEY`}
           </div>
         </div>
       )}
+
+      {/* Documents Tab */}
+      {activeTab === "documents" && <DocumentsTab />}
 
       {/* Unsubscribe Tab */}
       {activeTab === "unsubscribe" && (

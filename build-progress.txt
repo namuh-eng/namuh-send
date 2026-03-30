@@ -1261,3 +1261,30 @@
 - tests/settings-usage.test.tsx — 10 unit tests for UsageTab component
 - tests/e2e/settings-usage.spec.ts — 1 E2E test for settings usage page
 - prd.json — feature-041 passes: true
+
+## Iteration 6 — feature-044: Settings Documents Tab (2026-03-30)
+
+### What was built
+- Settings Documents tab with 4 static compliance document sections
+- Each section has: title, multi-line description, and Download link to static PDF
+- Documents: Penetration test (Oneleet attestation), SOC 2 (Type II report), DPA (signed agreement), Form W-9 (signed tax form)
+- Added "Documents" tab to the settings page tab bar
+- Created placeholder PDF files in public/static/documents/
+
+### Test results
+- 5 new unit tests passing (renders 4 sections, descriptions, download links, PDF paths, secondary text)
+- 1 new E2E test (documents page displays all sections with download links)
+- 445 total unit tests passing, no regressions
+- make check: typecheck + lint passing
+
+### Decisions
+- Used static PDF placeholders since these are compliance documents (not dynamically generated)
+- Download links open in new tab with target="_blank" and rel="noopener noreferrer"
+- Styled to match existing settings page card pattern (border, rounded-lg, consistent colors)
+
+### Files changed
+- src/components/settings-documents.tsx — New DocumentsTab component with 4 document sections
+- src/components/settings-page.tsx — Added Documents tab to tab bar and content area
+- tests/settings-documents.test.tsx — 5 unit tests for DocumentsTab
+- tests/e2e/settings-documents.spec.ts — E2E test for documents page
+- public/static/documents/*.pdf — 4 placeholder PDF files
