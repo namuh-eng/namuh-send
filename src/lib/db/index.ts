@@ -7,7 +7,7 @@ const needsSsl = connectionString?.includes("amazonaws.com");
 
 const pool = new Pool({
   connectionString,
-  ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
+  ssl: needsSsl ? { rejectUnauthorized: true } : undefined,
 });
 
 export const db = drizzle(pool, { schema });

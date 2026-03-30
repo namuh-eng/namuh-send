@@ -8,7 +8,6 @@ export default defineConfig({
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
-    url:
-      needsSsl && !url.includes("sslmode") ? `${url}?sslmode=no-verify` : url,
+    url: needsSsl && !url.includes("sslmode") ? `${url}?sslmode=require` : url,
   },
 });

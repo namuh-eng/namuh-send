@@ -61,13 +61,22 @@ Phase 1: Inspect (Claude + Ever CLI) → Phase 2: Build (Claude + Playwright E2E
 
 ## Security — Secrets Management
 - **NEVER hardcode passwords, tokens, or API keys** in scripts or source code
-- **RDS master password** is stored in AWS Secrets Manager: `resend-clone/db/master-password` (region: `us-east-1`)
-- To retrieve the DB password at runtime:
+- All secrets are stored in **AWS Secrets Manager** (region: `us-east-1`):
+
+  | Secret | Secrets Manager ID |
+  |--------|--------------------|
+  | RDS master password | `resend-clone/db/master-password` |
+  | Dashboard master key | `resend-clone/dashboard-key` |
+  | Cloudflare API token | `resend-clone/cloudflare/api-token` |
+  | Cloudflare zone ID | `resend-clone/cloudflare/zone-id` |
+
+- To retrieve any secret at runtime:
   ```bash
-  aws secretsmanager get-secret-value --secret-id resend-clone/db/master-password --region us-east-1 --query SecretString --output text
+  aws secretsmanager get-secret-value --secret-id <secret-id> --region us-east-1 --query SecretString --output text
   ```
 - When provisioning or updating infrastructure, always pull secrets from Secrets Manager — never use inline defaults
 - **`scripts/`** directory is gitignored (except `start.sh`) because it contains infra scripts with environment-specific values. These files live locally only — do not re-commit them
+- **Rate limiting** is enforced via Next.js middleware (`src/middleware.ts`) on all `/api/*` routes with tiered limits (strictest on email sending)
 
 ## Out of Scope — DO NOT build
 - Login / signup / authentication (use API key auth wall instead)
