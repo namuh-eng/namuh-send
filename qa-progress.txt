@@ -1,6 +1,6 @@
 # QA progress (independent QA)
 # from prd.json top-down; feature-001 handled by another session
-infra-001: SKIP
+infra-001: PARTIAL
 infra-002: PASS
 infra-003: PASS
 infra-004: PASS
@@ -20,6 +20,7 @@ Completed in this pass:
 - Updated `qa-report.json` with the current baseline: `feature-013` and `feature-016` both pass; `feature-017` is partial because the stock Playwright selector is malformed, not because of a confirmed product bug.
 
 Current QA findings:
+- `infra-001` is currently BLOCKED: `npm run db:migrate` fails in this worktree because `DATABASE_URL` is not set.
 - `feature-013` passes after rerunning under the correct localhost origin and removing stale test fixtures.
 - `feature-016` passes at the product level; the remaining failing assertion is a Playwright selector ambiguity around `ALL CONTACTS`, not a user-facing bug.
 - `feature-017` is currently blocked by a bad Playwright selector string in the test (`table, text=No contacts found`), while the page itself reaches a stable empty state.

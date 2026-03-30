@@ -1,5 +1,28 @@
 [
   {
+    "feature_id": "infra-001",
+    "status": "partial",
+    "category": "data",
+    "tested_steps": [
+      "Reviewed prd.json item infra-001: schema generation and migration generation/apply flow.",
+      "Ran `make test`; all unit tests passed (43 files, 453 tests).",
+      "Ran `npx playwright test tests/e2e/smoke.spec.ts`; 6/6 tests passed.",
+      "Ran `npm run db:generate`; command completed with existing migration SQL available and no uncommitted migration diff.",
+      "Ran `npm run db:migrate`; failed because DATABASE_URL was not present in this environment (`url: ''`).",
+      "Inspected `drizzle/0000_fearless_boomer.sql`; it contains required enums and all listed tables/relations for emails, domains, api_keys, contacts, segments, broadcasts, webhooks, templates, topics, properties, logs, email_events, and associated foreign keys."
+    ],
+    "bugs_found": [
+      {
+        "severity": "major",
+        "description": "Cannot execute `npm run db:migrate` in an unbootstrapped QA/codeworktree because `DATABASE_URL` is not defined.",
+        "expected": "Schema migration should run (or explicitly fail with actionable setup guidance) when verifying `infra-001`.",
+        "actual": "Drizzle exits with `Error  Please provide required params for Postgres driver: [x] url: ''` before migration starts.",
+        "reproduction": "From repository root without `DATABASE_URL` set in shell/env file, run `npm run db:migrate` and observe the same error."
+      }
+    ],
+    "fixes_applied": []
+  },
+  {
     "feature_id": "infra-004",
     "status": "pass",
     "category": "data",
