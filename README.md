@@ -81,6 +81,10 @@ A strict watchdog wraps the entire pipeline, ensuring all Ralph loops stay stabl
 
 We ran Ralph-to-Ralph against [resend.com](https://resend.com) — an email API platform for developers.
 
+![Resend Clone Dashboard — fully functional, deployed on AWS](docs/assets/screenshot-dashboard.png)
+
+*The autonomously-built Resend clone dashboard running on AWS App Runner — full email sending/receiving, domains, API keys, broadcasts, templates, webhooks, and more.*
+
 ### Video Demo — Sending a Real Email
 
 https://github.com/jaeyunha/ralph-to-ralph-prod/raw/main/docs/assets/demo-send-email.mp4
@@ -118,6 +122,18 @@ https://github.com/jaeyunha/ralph-to-ralph-prod/raw/main/docs/assets/demo-send-e
 - **API docs page** — Auto-generated endpoint documentation at `/docs`
 - **Auth wall** — API key unlocks both dashboard and API access
 - **Deployed to AWS** — App Runner with RDS Postgres, real cloud infrastructure
+
+#### Real Emails, Received in Gmail
+
+| Welcome Email | Broadcast Notification |
+|:---:|:---:|
+| ![Welcome email](docs/assets/screenshot-welcome-email.png) | ![Broadcast sent](docs/assets/screenshot-broadcast.png) |
+
+| API Key Rotated | TLS Enforced |
+|:---:|:---:|
+| ![API key rotated](docs/assets/screenshot-api-key-rotated.png) | ![TLS enforced](docs/assets/screenshot-tls-enforced.png) |
+
+*All emails sent from the autonomously-built clone via AWS SES — received in a real Gmail inbox.*
 
 ### Send an Email (Try It)
 
