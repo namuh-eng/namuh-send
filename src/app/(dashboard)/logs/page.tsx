@@ -6,10 +6,9 @@ import { desc } from "drizzle-orm";
 export default async function LogsPage() {
   let logRows: {
     id: string;
-    method: string;
-    path: string;
-    statusCode: number;
-    duration: number | null;
+    method: string | null;
+    endpoint: string | null;
+    statusCode: number | null;
     createdAt: string;
   }[] = [];
 
@@ -18,9 +17,8 @@ export default async function LogsPage() {
       .select({
         id: logs.id,
         method: logs.method,
-        path: logs.path,
-        statusCode: logs.statusCode,
-        duration: logs.duration,
+        endpoint: logs.endpoint,
+        status: logs.status,
         createdAt: logs.createdAt,
       })
       .from(logs)
@@ -30,9 +28,8 @@ export default async function LogsPage() {
     logRows = rows.map((r) => ({
       id: r.id,
       method: r.method,
-      path: r.path,
-      statusCode: r.statusCode,
-      duration: r.duration,
+      endpoint: r.endpoint,
+      statusCode: r.status,
       createdAt: r.createdAt.toISOString(),
     }));
   } catch {

@@ -13,9 +13,11 @@ export async function GET(
   const { id } = await params;
 
   try {
-    const webhook = await db.query.webhooks.findFirst({
-      where: eq(webhooks.id, id),
-    });
+    const [webhook] = await db
+      .select()
+      .from(webhooks)
+      .where(eq(webhooks.id, id))
+      .limit(1);
 
     if (!webhook) {
       return Response.json({ error: "Webhook not found" }, { status: 404 });
@@ -24,10 +26,9 @@ export async function GET(
     return Response.json({
       object: "webhook",
       id: webhook.id,
-      endpoint: webhook.endpoint,
-      events: webhook.events,
-      active: webhook.active,
-      signing_secret: webhook.signingSecret,
+      endpoint: webhook.url,
+      events: webhook.eventTypes,
+      active: webhook.status === "active",
       created_at: webhook.createdAt,
     });
   } catch (err) {
@@ -55,9 +56,10 @@ export async function PATCH(
 
   try {
     const updateData: Record<string, unknown> = {};
-    if (body.endpoint !== undefined) updateData.endpoint = body.endpoint;
-    if (body.events !== undefined) updateData.events = body.events;
-    if (body.active !== undefined) updateData.active = body.active;
+    if (body.endpoint !== undefined) updateData.url = body.endpoint;
+    if (body.events !== undefined) updateData.eventTypes = body.events;
+    if (body.active !== undefined)
+      updateData.status = body.active ? "active" : "inactive";
 
     const [updated] = await db
       .update(webhooks)
@@ -72,9 +74,9 @@ export async function PATCH(
     return Response.json({
       object: "webhook",
       id: updated.id,
-      endpoint: updated.endpoint,
-      events: updated.events,
-      active: updated.active,
+      endpoint: updated.url,
+      events: updated.eventTypes,
+      active: updated.status === "active",
       created_at: updated.createdAt,
     });
   } catch (err) {

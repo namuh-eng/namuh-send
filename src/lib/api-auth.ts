@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 export interface AuthResult {
   apiKeyId: string;
   permission: string;
-  domainId: string | null;
+  domain: string | null;
 }
 
 /**
@@ -27,7 +27,7 @@ export async function validateApiKey(
   const hashedKey = createHash("sha256").update(rawKey).digest("hex");
 
   const found = await db.query.apiKeys.findFirst({
-    where: eq(apiKeys.hashedKey, hashedKey),
+    where: eq(apiKeys.tokenHash, hashedKey),
   });
 
   if (!found) return null;
@@ -35,7 +35,7 @@ export async function validateApiKey(
   return {
     apiKeyId: found.id,
     permission: found.permission,
-    domainId: found.domainId,
+    domain: found.domain,
   };
 }
 

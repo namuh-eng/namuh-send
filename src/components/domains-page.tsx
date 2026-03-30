@@ -3,9 +3,9 @@
 import { ComboboxFilter } from "@/components/combobox-filter";
 import { formatRelativeTime } from "@/components/emails-sending-data-table";
 import { ExportButton } from "@/components/export-button";
+import { Modal } from "@/components/modal";
 import { SearchInput } from "@/components/search-input";
 import { StatusBadge } from "@/components/status-badge";
-import { Modal } from "@/components/modal";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -223,7 +223,14 @@ export function DomainsPage({ domains }: DomainsPageProps) {
       )}
       {/* Add Domain Modal */}
       {showAddModal && (
-        <Modal open={showAddModal} onClose={() => { setShowAddModal(false); setNewDomain(""); }} title="Add domain">
+        <Modal
+          open={showAddModal}
+          onClose={() => {
+            setShowAddModal(false);
+            setNewDomain("");
+          }}
+          title="Add domain"
+        >
           <p className="text-[13px] text-[#A1A4A5] mb-4">
             Enter the domain you want to verify for sending emails.
           </p>
@@ -237,7 +244,10 @@ export function DomainsPage({ domains }: DomainsPageProps) {
           <div className="flex justify-end gap-2">
             <button
               type="button"
-              onClick={() => { setShowAddModal(false); setNewDomain(""); }}
+              onClick={() => {
+                setShowAddModal(false);
+                setNewDomain("");
+              }}
               className="px-3 py-1.5 text-[13px] text-[#A1A4A5] border border-[rgba(176,199,217,0.145)] rounded-lg hover:bg-[rgba(176,199,217,0.1)]"
             >
               Cancel

@@ -14,9 +14,9 @@ export async function GET(
       .select({
         id: apiKeys.id,
         name: apiKeys.name,
-        keyPrefix: apiKeys.keyPrefix,
+        tokenPreview: apiKeys.tokenPreview,
         permission: apiKeys.permission,
-        domainId: apiKeys.domainId,
+        domain: apiKeys.domain,
         createdAt: apiKeys.createdAt,
       })
       .from(apiKeys)
@@ -30,9 +30,9 @@ export async function GET(
     return Response.json({
       id: key.id,
       name: key.name,
-      key_prefix: key.keyPrefix,
+      key_prefix: key.tokenPreview,
       permission: key.permission,
-      domain_id: key.domainId,
+      domain_id: key.domain,
       created_at: key.createdAt,
     });
   } catch (err) {
@@ -66,7 +66,7 @@ export async function PATCH(
     const updates: Record<string, unknown> = {};
     if (body.name !== undefined) updates.name = body.name.trim();
     if (body.permission !== undefined) updates.permission = body.permission;
-    if (body.domain_id !== undefined) updates.domainId = body.domain_id;
+    if (body.domain_id !== undefined) updates.domain = body.domain_id;
 
     if (Object.keys(updates).length === 0) {
       return Response.json({ error: "No fields to update" }, { status: 400 });
@@ -79,9 +79,9 @@ export async function PATCH(
       .returning({
         id: apiKeys.id,
         name: apiKeys.name,
-        keyPrefix: apiKeys.keyPrefix,
+        tokenPreview: apiKeys.tokenPreview,
         permission: apiKeys.permission,
-        domainId: apiKeys.domainId,
+        domain: apiKeys.domain,
         createdAt: apiKeys.createdAt,
       });
 
@@ -92,9 +92,9 @@ export async function PATCH(
     return Response.json({
       id: updated.id,
       name: updated.name,
-      key_prefix: updated.keyPrefix,
+      key_prefix: updated.tokenPreview,
       permission: updated.permission,
-      domain_id: updated.domainId,
+      domain_id: updated.domain,
       created_at: updated.createdAt,
     });
   } catch (err) {

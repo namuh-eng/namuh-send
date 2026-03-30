@@ -24,11 +24,11 @@ export default async function LogDetailPage({
 
     const logData = {
       id: logResult.id,
-      method: logResult.method,
-      path: logResult.path,
-      statusCode: logResult.statusCode,
-      duration: logResult.duration,
-      apiKeyId: logResult.apiKeyId,
+      method: logResult.method ?? "GET",
+      path: logResult.endpoint ?? "",
+      statusCode: logResult.status ?? 0,
+      duration: null as number | null,
+      apiKeyId: null as string | null,
       requestBody: logResult.requestBody as Record<string, unknown> | null,
       responseBody: logResult.responseBody as Record<string, unknown> | null,
       createdAt: logResult.createdAt.toISOString(),

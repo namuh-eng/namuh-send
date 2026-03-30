@@ -43,7 +43,6 @@ export async function PATCH(
       .update(templates)
       .set({
         ...body,
-        updatedAt: new Date(),
       })
       .where(eq(templates.id, id))
       .returning();

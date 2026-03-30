@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { db } from "@/lib/db";
-import { apiKeys, domains } from "@/lib/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { apiKeys } from "@/lib/db/schema";
+import { desc } from "drizzle-orm";
 
 // ── GET /api/api-keys ────────────────────────────────────────────
 // Internal dashboard endpoint — no API key auth required (dashboard key auth)
@@ -12,9 +12,9 @@ export async function GET(): Promise<Response> {
       .select({
         id: apiKeys.id,
         name: apiKeys.name,
-        keyPrefix: apiKeys.keyPrefix,
+        tokenPreview: apiKeys.tokenPreview,
         permission: apiKeys.permission,
-        domainId: apiKeys.domainId,
+        domain: apiKeys.domain,
         createdAt: apiKeys.createdAt,
       })
       .from(apiKeys)
@@ -48,37 +48,27 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: "name is required" }, { status: 422 });
   }
 
-  // Validate domain_id if provided
-  if (body.domain_id) {
-    const domain = await db.query.domains.findFirst({
-      where: eq(domains.id, body.domain_id),
-    });
-    if (!domain) {
-      return Response.json({ error: "Domain not found" }, { status: 404 });
-    }
-  }
-
   try {
     // Generate API key: re_ prefix + UUID
     const rawKey = `re_${randomUUID().replace(/-/g, "")}`;
-    const hashedKey = createHash("sha256").update(rawKey).digest("hex");
-    const keyPrefix = `${rawKey.slice(0, 12)}...`;
+    const tokenHash = createHash("sha256").update(rawKey).digest("hex");
+    const tokenPreview = `${rawKey.slice(0, 6)}...${rawKey.slice(-4)}`;
 
     const [created] = await db
       .insert(apiKeys)
       .values({
         name: body.name.trim(),
-        hashedKey,
-        keyPrefix,
+        tokenHash,
+        tokenPreview,
         permission: body.permission ?? "full_access",
-        domainId: body.domain_id ?? null,
+        domain: body.domain_id ?? null,
       })
       .returning({
         id: apiKeys.id,
         name: apiKeys.name,
-        keyPrefix: apiKeys.keyPrefix,
+        tokenPreview: apiKeys.tokenPreview,
         permission: apiKeys.permission,
-        domainId: apiKeys.domainId,
+        domain: apiKeys.domain,
         createdAt: apiKeys.createdAt,
       });
 
@@ -86,9 +76,9 @@ export async function POST(request: Request): Promise<Response> {
       id: created.id,
       name: created.name,
       token: rawKey,
-      key_prefix: created.keyPrefix,
+      key_prefix: created.tokenPreview,
       permission: created.permission,
-      domain_id: created.domainId,
+      domain_id: created.domain,
       created_at: created.createdAt,
     });
   } catch (err) {

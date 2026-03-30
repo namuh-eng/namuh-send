@@ -31,8 +31,8 @@ export async function GET(
       status: domain.status,
       region: domain.region,
       created_at: domain.createdAt.toISOString(),
-      click_tracking: domain.clickTracking,
-      open_tracking: domain.openTracking,
+      click_tracking: domain.trackClicks,
+      open_tracking: domain.trackOpens,
       tls: domain.tls,
       records: domain.records,
     });
@@ -58,10 +58,10 @@ export async function PATCH(
     const updates: Record<string, unknown> = {};
 
     if (body.click_tracking !== undefined) {
-      updates.clickTracking = body.click_tracking;
+      updates.trackClicks = body.click_tracking;
     }
     if (body.open_tracking !== undefined) {
-      updates.openTracking = body.open_tracking;
+      updates.trackOpens = body.open_tracking;
     }
     if (body.tls !== undefined) {
       const val = body.tls;
@@ -69,18 +69,10 @@ export async function PATCH(
         updates.tls = val;
       }
     }
-    if (body.sending_enabled !== undefined) {
-      updates.sendingEnabled = body.sending_enabled;
-    }
-    if (body.receiving_enabled !== undefined) {
-      updates.receivingEnabled = body.receiving_enabled;
-    }
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: "No valid fields" }, { status: 400 });
     }
-
-    updates.updatedAt = new Date();
 
     await db.update(domains).set(updates).where(eq(domains.id, id));
 

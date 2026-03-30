@@ -23,9 +23,9 @@ export async function GET(request: NextRequest) {
       conditions.push(ilike(templates.name, `%${search}%`));
     }
     if (status === "published") {
-      conditions.push(eq(templates.published, true));
+      conditions.push(eq(templates.status, "published"));
     } else if (status === "draft") {
-      conditions.push(eq(templates.published, false));
+      conditions.push(eq(templates.status, "draft"));
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
         id: templates.id,
         name: templates.name,
         alias: templates.alias,
-        published: templates.published,
+        status: templates.status,
         html: templates.html,
         createdAt: templates.createdAt,
       })
@@ -50,7 +50,10 @@ export async function GET(request: NextRequest) {
       .limit(200);
 
     return NextResponse.json({
-      data: rows,
+      data: rows.map((r) => ({
+        ...r,
+        published: r.status === "published",
+      })),
       total: totalRow?.count ?? 0,
     });
   } catch (error) {
@@ -73,7 +76,10 @@ export async function POST(request: NextRequest) {
       .values({ name, alias })
       .returning();
 
-    return NextResponse.json(template, { status: 201 });
+    return NextResponse.json(
+      { ...template, published: template.status === "published" },
+      { status: 201 },
+    );
   } catch (error) {
     console.error("Failed to create template:", error);
     return NextResponse.json(

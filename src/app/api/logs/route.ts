@@ -23,7 +23,7 @@ export async function GET(request: Request): Promise<Response> {
     const conditions: SQL[] = [];
 
     if (status) {
-      conditions.push(eq(logs.statusCode, Number(status)));
+      conditions.push(eq(logs.status, Number(status)));
     }
     if (method) {
       conditions.push(eq(logs.method, method.toUpperCase()));
@@ -41,10 +41,9 @@ export async function GET(request: Request): Promise<Response> {
       .select({
         id: logs.id,
         method: logs.method,
-        path: logs.path,
-        statusCode: logs.statusCode,
-        apiKeyId: logs.apiKeyId,
-        duration: logs.duration,
+        endpoint: logs.endpoint,
+        status: logs.status,
+        userAgent: logs.userAgent,
         createdAt: logs.createdAt,
       })
       .from(logs)
@@ -58,10 +57,9 @@ export async function GET(request: Request): Promise<Response> {
       data: results.map((l) => ({
         id: l.id,
         method: l.method,
-        path: l.path,
-        status_code: l.statusCode,
-        api_key_id: l.apiKeyId,
-        duration: l.duration,
+        endpoint: l.endpoint,
+        status: l.status,
+        user_agent: l.userAgent,
         created_at: l.createdAt,
       })),
     });

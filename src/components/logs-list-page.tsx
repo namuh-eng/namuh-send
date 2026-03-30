@@ -7,10 +7,9 @@ import { useMemo, useState } from "react";
 
 interface LogRow {
   id: string;
-  method: string;
-  path: string;
-  statusCode: number;
-  duration: number | null;
+  method: string | null;
+  endpoint: string | null;
+  statusCode: number | null;
   createdAt: string;
 }
 
@@ -80,10 +79,10 @@ export function LogsListPage({ logs }: { logs: LogRow[] }) {
     if (statusFilter !== "all") {
       filtered = filtered.filter((log) => {
         if (statusFilter === "2xx")
-          return log.statusCode >= 200 && log.statusCode < 300;
+          return (log.statusCode ?? 0) >= 200 && (log.statusCode ?? 0) < 300;
         if (statusFilter === "4xx")
-          return log.statusCode >= 400 && log.statusCode < 500;
-        if (statusFilter === "5xx") return log.statusCode >= 500;
+          return (log.statusCode ?? 0) >= 400 && (log.statusCode ?? 0) < 500;
+        if (statusFilter === "5xx") return (log.statusCode ?? 0) >= 500;
         return true;
       });
     }
@@ -108,17 +107,17 @@ export function LogsListPage({ logs }: { logs: LogRow[] }) {
       sortable: true,
       render: (row: LogRow) => (
         <StatusBadge
-          status={row.method.toUpperCase()}
-          variant={getMethodVariant(row.method)}
+          status={(row.method ?? "GET").toUpperCase()}
+          variant={getMethodVariant(row.method ?? "GET")}
         />
       ),
     },
     {
-      key: "path",
+      key: "endpoint",
       header: "Endpoint",
       sortable: true,
       render: (row: LogRow) => (
-        <span className="font-mono text-[13px]">{row.path}</span>
+        <span className="font-mono text-[13px]">{row.endpoint ?? "-"}</span>
       ),
     },
     {
@@ -127,19 +126,9 @@ export function LogsListPage({ logs }: { logs: LogRow[] }) {
       sortable: true,
       render: (row: LogRow) => (
         <StatusBadge
-          status={String(row.statusCode)}
-          variant={getStatusVariant(row.statusCode)}
+          status={String(row.statusCode ?? 0)}
+          variant={getStatusVariant(row.statusCode ?? 0)}
         />
-      ),
-    },
-    {
-      key: "duration",
-      header: "Duration",
-      sortable: true,
-      render: (row: LogRow) => (
-        <span className="text-[#A1A4A5] text-[13px]">
-          {row.duration != null ? `${row.duration}ms` : "-"}
-        </span>
       ),
     },
     {

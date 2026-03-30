@@ -1,7 +1,7 @@
 import { ApiKeyDetail } from "@/components/api-key-detail";
 import { db } from "@/lib/db";
-import { apiKeys, domains, logs } from "@/lib/db/schema";
-import { count, eq } from "drizzle-orm";
+import { apiKeys, domains } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 
 export default async function ApiKeyDetailPage({
@@ -15,9 +15,9 @@ export default async function ApiKeyDetailPage({
     .select({
       id: apiKeys.id,
       name: apiKeys.name,
-      keyPrefix: apiKeys.keyPrefix,
+      tokenPreview: apiKeys.tokenPreview,
       permission: apiKeys.permission,
-      domainId: apiKeys.domainId,
+      domain: apiKeys.domain,
       createdAt: apiKeys.createdAt,
     })
     .from(apiKeys)
@@ -28,44 +28,34 @@ export default async function ApiKeyDetailPage({
     notFound();
   }
 
-  // Fetch domain name, total uses, last used in parallel
-  const [domainResult, usesResult, lastUsedResult, domainList] =
-    await Promise.all([
-      keyResult.domainId
-        ? db
-            .select({ name: domains.name })
-            .from(domains)
-            .where(eq(domains.id, keyResult.domainId))
-            .limit(1)
-        : Promise.resolve([]),
-      db.select({ count: count() }).from(logs).where(eq(logs.apiKeyId, id)),
-      db
-        .select({ createdAt: logs.createdAt })
-        .from(logs)
-        .where(eq(logs.apiKeyId, id))
-        .orderBy(logs.createdAt)
-        .limit(1),
-      db
-        .select({ id: domains.id, name: domains.name })
-        .from(domains)
-        .orderBy(domains.name),
-    ]);
+  // Fetch domain name
+  const [domainResult, domainList] = await Promise.all([
+    keyResult.domain
+      ? db
+          .select({ name: domains.name })
+          .from(domains)
+          .where(eq(domains.name, keyResult.domain))
+          .limit(1)
+      : Promise.resolve([]),
+    db
+      .select({ id: domains.id, name: domains.name })
+      .from(domains)
+      .orderBy(domains.name),
+  ]);
 
   const domainName = domainResult[0]?.name ?? "All domains";
-  const totalUses = usesResult[0]?.count ?? 0;
-  const lastUsedAt = lastUsedResult[0]?.createdAt?.toISOString() ?? null;
 
   return (
     <ApiKeyDetail
       apiKey={{
         id: keyResult.id,
         name: keyResult.name,
-        keyPrefix: keyResult.keyPrefix,
-        permission: keyResult.permission,
-        domainId: keyResult.domainId,
+        tokenPreview: keyResult.tokenPreview ?? "",
+        permission: keyResult.permission as "full_access" | "sending_access",
+        domain: keyResult.domain,
         domainName,
-        totalUses,
-        lastUsedAt,
+        totalUses: 0,
+        lastUsedAt: keyResult.createdAt.toISOString(),
         createdAt: keyResult.createdAt.toISOString(),
         creatorEmail: "jaeyunha@foreverbrowsing.com",
       }}

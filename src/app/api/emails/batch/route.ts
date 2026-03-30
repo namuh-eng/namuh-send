@@ -1,6 +1,6 @@
 import { unauthorizedResponse, validateApiKey } from "@/lib/api-auth";
 import { db } from "@/lib/db";
-import { emailEvents, emails } from "@/lib/db/schema";
+import { emails } from "@/lib/db/schema";
 import { sendEmail as sesSendEmail } from "@/lib/ses";
 
 interface BatchEmailBody {
@@ -84,23 +84,18 @@ export async function POST(request: Request): Promise<Response> {
         .values({
           from: item.from,
           to,
-          cc: cc ?? null,
-          bcc: bcc ?? null,
-          replyTo: replyTo?.[0] ?? null,
+          cc: cc ?? [],
+          bcc: bcc ?? [],
+          replyTo: replyTo ?? [],
           subject: item.subject,
-          html: item.html ?? null,
-          text: item.text ?? null,
-          tags: item.tags ?? null,
-          lastEvent: "sent",
-          apiKeyId: auth.apiKeyId,
-          sesMessageId: sesResult.id,
+          html: item.html ?? "",
+          text: item.text ?? "",
+          tags: item.tags ?? [],
+          headers: {},
+          attachments: [],
+          status: "sent",
         })
         .returning({ id: emails.id });
-
-      await db.insert(emailEvents).values({
-        emailId: email.id,
-        type: "sent",
-      });
 
       results.push({ id: email.id });
     }

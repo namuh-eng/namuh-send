@@ -1,6 +1,6 @@
 import { unauthorizedResponse, validateApiKey } from "@/lib/api-auth";
 import { db } from "@/lib/db";
-import { broadcasts, segments } from "@/lib/db/schema";
+import { broadcasts } from "@/lib/db/schema";
 import { type SQL, and, count, desc, eq, ilike } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       );
     }
     if (segmentId) {
-      conditions.push(eq(broadcasts.segmentId, segmentId));
+      conditions.push(eq(broadcasts.audienceId, segmentId));
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
         id: broadcasts.id,
         name: broadcasts.name,
         status: broadcasts.status,
-        segmentId: broadcasts.segmentId,
+        segmentId: broadcasts.audienceId,
         createdAt: broadcasts.createdAt,
       })
       .from(broadcasts)

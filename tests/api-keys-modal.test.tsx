@@ -28,7 +28,7 @@ const mockKeys: ApiKeyRow[] = [
   {
     id: "key-1",
     name: "Production Key",
-    keyPrefix: "re_abc123...",
+    tokenPreview: "re_abc...123",
     permission: "full_access",
     lastUsedAt: null,
     createdAt: "2026-03-01T10:00:00Z",

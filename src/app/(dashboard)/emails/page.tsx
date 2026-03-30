@@ -1,6 +1,8 @@
 import { EmailsSendingPage } from "@/components/emails-sending-page";
 import { db } from "@/lib/db";
 import { apiKeys, emails } from "@/lib/db/schema";
+
+// emails.status maps to lastEvent in the UI
 import { desc } from "drizzle-orm";
 
 export default async function EmailsPage() {
@@ -23,7 +25,7 @@ export default async function EmailsPage() {
         .select({
           id: emails.id,
           to: emails.to,
-          lastEvent: emails.lastEvent,
+          lastEvent: emails.status,
           subject: emails.subject,
           createdAt: emails.createdAt,
         })

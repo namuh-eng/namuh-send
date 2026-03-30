@@ -15,9 +15,6 @@ export async function GET(
   try {
     const email = await db.query.emails.findFirst({
       where: eq(emails.id, id),
-      with: {
-        events: true,
-      },
     });
 
     if (!email) {
@@ -35,15 +32,11 @@ export async function GET(
       cc: email.cc,
       bcc: email.bcc,
       reply_to: email.replyTo,
-      last_event: email.lastEvent,
+      last_event: email.status,
       scheduled_at: email.scheduledAt,
       tags: email.tags,
       created_at: email.createdAt,
-      events: email.events.map((e) => ({
-        type: e.type,
-        timestamp: e.timestamp,
-        data: e.data,
-      })),
+      status: email.status,
     });
   } catch (err) {
     const message =

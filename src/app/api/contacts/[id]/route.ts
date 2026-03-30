@@ -13,17 +13,11 @@ export async function GET(
   const { id } = await params;
 
   try {
-    const contact = await db.query.contacts.findFirst({
-      where: eq(contacts.id, id),
-      with: {
-        segments: {
-          with: { segment: true },
-        },
-        topics: {
-          with: { topic: true },
-        },
-      },
-    });
+    const [contact] = await db
+      .select()
+      .from(contacts)
+      .where(eq(contacts.id, id))
+      .limit(1);
 
     if (!contact) {
       return Response.json({ error: "Contact not found" }, { status: 404 });
@@ -36,18 +30,10 @@ export async function GET(
       first_name: contact.firstName,
       last_name: contact.lastName,
       unsubscribed: contact.unsubscribed,
-      properties: contact.properties,
-      segments: contact.segments.map((cs) => ({
-        id: cs.segment.id,
-        name: cs.segment.name,
-      })),
-      topics: contact.topics.map((ct) => ({
-        id: ct.topic.id,
-        name: ct.topic.name,
-        subscribed: ct.subscribed,
-      })),
+      properties: contact.customProperties,
+      segments: contact.segments ?? [],
+      topics: contact.topicSubscriptions ?? [],
       created_at: contact.createdAt,
-      updated_at: contact.updatedAt,
     });
   } catch (err) {
     const message =
@@ -73,13 +59,14 @@ export async function PATCH(
   }
 
   try {
-    const updateData: Record<string, unknown> = { updatedAt: new Date() };
+    const updateData: Record<string, unknown> = {};
     if (body.email !== undefined) updateData.email = body.email;
     if (body.first_name !== undefined) updateData.firstName = body.first_name;
     if (body.last_name !== undefined) updateData.lastName = body.last_name;
     if (body.unsubscribed !== undefined)
       updateData.unsubscribed = body.unsubscribed;
-    if (body.properties !== undefined) updateData.properties = body.properties;
+    if (body.properties !== undefined)
+      updateData.customProperties = body.properties;
 
     const [updated] = await db
       .update(contacts)
@@ -98,9 +85,8 @@ export async function PATCH(
       first_name: updated.firstName,
       last_name: updated.lastName,
       unsubscribed: updated.unsubscribed,
-      properties: updated.properties,
+      properties: updated.customProperties,
       created_at: updated.createdAt,
-      updated_at: updated.updatedAt,
     });
   } catch (err) {
     const message =

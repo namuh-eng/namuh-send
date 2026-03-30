@@ -25,12 +25,11 @@ export async function GET(
       object: "log",
       id: log.id,
       method: log.method,
-      path: log.path,
-      status_code: log.statusCode,
-      api_key_id: log.apiKeyId,
+      endpoint: log.endpoint,
+      status: log.status,
+      user_agent: log.userAgent,
       request_body: log.requestBody,
       response_body: log.responseBody,
-      duration: log.duration,
       created_at: log.createdAt,
     });
   } catch (err) {

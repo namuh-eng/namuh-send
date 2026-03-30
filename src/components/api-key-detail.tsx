@@ -8,9 +8,9 @@ import { useCallback, useState } from "react";
 export interface ApiKeyDetailData {
   id: string;
   name: string;
-  keyPrefix: string;
+  tokenPreview: string;
   permission: "full_access" | "sending_access";
-  domainId: string | null;
+  domain: string | null;
   domainName: string;
   totalUses: number;
   lastUsedAt: string | null;
@@ -66,7 +66,7 @@ export function ApiKeyDetail({ apiKey, domains }: ApiKeyDetailProps) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editName, setEditName] = useState(apiKey.name);
   const [editPermission, setEditPermission] = useState(apiKey.permission);
-  const [editDomainId, setEditDomainId] = useState(apiKey.domainId ?? "");
+  const [editDomainId, setEditDomainId] = useState(apiKey.domain ?? "");
   const [currentName, setCurrentName] = useState(apiKey.name);
   const [saving, setSaving] = useState(false);
 
@@ -251,7 +251,7 @@ export function ApiKeyDetail({ apiKey, domains }: ApiKeyDetailProps) {
             TOKEN
           </p>
           <p className="text-[14px] text-[#A1A4A5] font-mono">
-            {apiKey.keyPrefix}
+            {apiKey.tokenPreview}
           </p>
         </div>
 

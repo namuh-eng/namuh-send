@@ -7,9 +7,9 @@ export default async function ApiKeysPage() {
   let keys: {
     id: string;
     name: string;
-    keyPrefix: string;
-    permission: "full_access" | "sending_access";
-    domainId: string | null;
+    tokenPreview: string | null;
+    permission: string;
+    domain: string | null;
     createdAt: Date;
   }[] = [];
   let domainList: { id: string; name: string }[] = [];
@@ -20,9 +20,9 @@ export default async function ApiKeysPage() {
         .select({
           id: apiKeys.id,
           name: apiKeys.name,
-          keyPrefix: apiKeys.keyPrefix,
+          tokenPreview: apiKeys.tokenPreview,
           permission: apiKeys.permission,
-          domainId: apiKeys.domainId,
+          domain: apiKeys.domain,
           createdAt: apiKeys.createdAt,
         })
         .from(apiKeys)
@@ -42,8 +42,8 @@ export default async function ApiKeysPage() {
       keys={keys.map((k) => ({
         id: k.id,
         name: k.name,
-        keyPrefix: k.keyPrefix,
-        permission: k.permission,
+        tokenPreview: k.tokenPreview ?? "",
+        permission: k.permission as "full_access" | "sending_access",
         lastUsedAt: null,
         createdAt: k.createdAt.toISOString(),
       }))}

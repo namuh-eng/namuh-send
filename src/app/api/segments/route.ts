@@ -1,7 +1,7 @@
 import { unauthorizedResponse, validateApiKey } from "@/lib/api-auth";
 import { db } from "@/lib/db";
-import { contactSegments, contacts, segments } from "@/lib/db/schema";
-import { asc, count, eq, ilike, sql } from "drizzle-orm";
+import { segments } from "@/lib/db/schema";
+import { asc, count, ilike } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -26,21 +26,14 @@ export async function GET(request: NextRequest) {
       .from(segments)
       .where(conditions);
 
-    // Get segments with contacts count and unsubscribed count
+    // Get segments with counts from the table columns
     const rows = await db
       .select({
         id: segments.id,
         name: segments.name,
         createdAt: segments.createdAt,
-        contactsCount: sql<number>`(
-          select count(*)::int from contact_segments cs
-          where cs.segment_id = ${segments.id}
-        )`,
-        unsubscribedCount: sql<number>`(
-          select count(*)::int from contact_segments cs
-          inner join contacts c on c.id = cs.contact_id
-          where cs.segment_id = ${segments.id} and c.unsubscribed = true
-        )`,
+        contactsCount: segments.contactsCount,
+        unsubscribedCount: segments.unsubscribedCount,
       })
       .from(segments)
       .where(conditions)

@@ -1,18 +1,21 @@
-import { randomBytes } from "node:crypto";
 import { unauthorizedResponse, validateApiKey } from "@/lib/api-auth";
 import { db } from "@/lib/db";
 import { webhooks } from "@/lib/db/schema";
 import { desc } from "drizzle-orm";
 
 interface CreateWebhookBody {
-  endpoint: string;
-  events: string[];
+  url: string;
+  event_types: string[];
 }
 
 function validateCreateBody(body: CreateWebhookBody): string | null {
-  if (!body.endpoint) return "endpoint is required";
-  if (!body.events || !Array.isArray(body.events) || body.events.length === 0) {
-    return "events array is required";
+  if (!body.url) return "url is required";
+  if (
+    !body.event_types ||
+    !Array.isArray(body.event_types) ||
+    body.event_types.length === 0
+  ) {
+    return "event_types array is required";
   }
   return null;
 }
@@ -31,9 +34,9 @@ export async function GET(request: Request): Promise<Response> {
     const results = await db
       .select({
         id: webhooks.id,
-        endpoint: webhooks.endpoint,
-        events: webhooks.events,
-        active: webhooks.active,
+        url: webhooks.url,
+        eventTypes: webhooks.eventTypes,
+        status: webhooks.status,
         createdAt: webhooks.createdAt,
       })
       .from(webhooks)
@@ -44,9 +47,9 @@ export async function GET(request: Request): Promise<Response> {
       object: "list",
       data: results.map((w) => ({
         id: w.id,
-        endpoint: w.endpoint,
-        events: w.events,
-        active: w.active,
+        endpoint: w.url,
+        events: w.eventTypes,
+        active: w.status === "active",
         created_at: w.createdAt,
       })),
     });
@@ -74,24 +77,20 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
-    const signingSecret = `whsec_${randomBytes(24).toString("hex")}`;
-
     const [webhook] = await db
       .insert(webhooks)
       .values({
-        endpoint: body.endpoint,
-        events: body.events,
-        signingSecret,
+        url: body.url,
+        eventTypes: body.event_types,
       })
       .returning();
 
     return Response.json(
       {
         id: webhook.id,
-        endpoint: webhook.endpoint,
-        events: webhook.events,
-        active: webhook.active,
-        signing_secret: webhook.signingSecret,
+        endpoint: webhook.url,
+        events: webhook.eventTypes,
+        active: webhook.status === "active",
         created_at: webhook.createdAt,
       },
       { status: 201 },

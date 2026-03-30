@@ -32,7 +32,6 @@ export async function POST(
       .update(domains)
       .set({
         status: verificationStatus,
-        updatedAt: new Date(),
       })
       .where(eq(domains.id, id))
       .returning();
@@ -43,7 +42,7 @@ export async function POST(
       name: updated.name,
       status: updated.status,
       records: updated.records,
-      updated_at: updated.updatedAt,
+      created_at: updated.createdAt,
     });
   } catch (err) {
     const message =

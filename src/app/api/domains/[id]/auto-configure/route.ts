@@ -76,7 +76,6 @@ export async function POST(
       .set({
         records: allRecords,
         status: "pending",
-        updatedAt: new Date(),
       })
       .where(eq(domains.id, id));
 

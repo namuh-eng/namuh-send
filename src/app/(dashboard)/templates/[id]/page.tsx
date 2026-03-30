@@ -30,10 +30,10 @@ export default async function TemplateDetailPage({
       subject: template.subject,
       html: template.html,
       text: template.text,
-      published: template.published,
+      published: template.status === "published",
       variables: template.variables ?? [],
       createdAt: template.createdAt.toISOString(),
-      updatedAt: template.updatedAt.toISOString(),
+      updatedAt: template.createdAt.toISOString(),
     };
 
     return <TemplateDetail template={templateData} />;

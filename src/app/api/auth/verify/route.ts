@@ -20,7 +20,7 @@ export async function POST(request: Request): Promise<Response> {
   try {
     const hashedKey = createHash("sha256").update(rawKey).digest("hex");
     const found = await db.query.apiKeys.findFirst({
-      where: eq(apiKeys.hashedKey, hashedKey),
+      where: eq(apiKeys.tokenHash, hashedKey),
     });
 
     if (!found) {

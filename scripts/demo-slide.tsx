@@ -9,17 +9,36 @@ const resend = new ResendClone("re_demo_key", {
 // React email component
 const WelcomeEmail = ({ name }: { name: string }) => (
   <html>
-    <body style={{ background: "#0a0a0a", fontFamily: "sans-serif", padding: 40 }}>
-      <div style={{ maxWidth: 600, margin: "0 auto", background: "#18181b", borderRadius: 12, padding: 40, border: "1px solid #27272a" }}>
-        <h1 style={{ color: "#fff", fontSize: 28 }}>
-          Welcome, {name}! 🚀
-        </h1>
+    <body
+      style={{ background: "#0a0a0a", fontFamily: "sans-serif", padding: 40 }}
+    >
+      <div
+        style={{
+          maxWidth: 600,
+          margin: "0 auto",
+          background: "#18181b",
+          borderRadius: 12,
+          padding: 40,
+          border: "1px solid #27272a",
+        }}
+      >
+        <h1 style={{ color: "#fff", fontSize: 28 }}>Welcome, {name}! 🚀</h1>
         <p style={{ color: "#a1a1aa", fontSize: 16, lineHeight: 1.6 }}>
           This email was sent using React components through our
           autonomously-cloned email API.
         </p>
-        <a href="https://zjucbjapsn.us-east-1.awsapprunner.com"
-          style={{ display: "inline-block", background: "#3b82f6", color: "#fff", padding: "12px 24px", borderRadius: 8, textDecoration: "none", fontWeight: 600 }}>
+        <a
+          href="https://zjucbjapsn.us-east-1.awsapprunner.com"
+          style={{
+            display: "inline-block",
+            background: "#3b82f6",
+            color: "#fff",
+            padding: "12px 24px",
+            borderRadius: 8,
+            textDecoration: "none",
+            fontWeight: 600,
+          }}
+        >
           View Dashboard →
         </a>
       </div>

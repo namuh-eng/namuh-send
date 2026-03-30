@@ -50,7 +50,6 @@ export async function PATCH(
       .update(broadcasts)
       .set({
         ...body,
-        updatedAt: new Date(),
       })
       .where(eq(broadcasts.id, id))
       .returning();

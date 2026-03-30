@@ -1,24 +1,13 @@
 import {
   apiKeys,
-  broadcastStatusEnum,
   broadcasts,
-  contactSegments,
-  contactTopics,
   contacts,
-  domainStatusEnum,
   domains,
-  emailEvents,
-  emailStatusEnum,
   emails,
   logs,
-  permissionTypeEnum,
-  properties,
   segments,
   templates,
-  topicDefaultSubscriptionEnum,
-  topicVisibilityEnum,
   topics,
-  webhookEventEnum,
   webhooks,
 } from "@/lib/db/schema";
 import { getTableColumns, getTableName } from "drizzle-orm";
@@ -30,82 +19,13 @@ describe("Database schema", () => {
       expect(getTableName(domains)).toBe("domains");
       expect(getTableName(apiKeys)).toBe("api_keys");
       expect(getTableName(emails)).toBe("emails");
-      expect(getTableName(emailEvents)).toBe("email_events");
       expect(getTableName(segments)).toBe("segments");
       expect(getTableName(topics)).toBe("topics");
       expect(getTableName(contacts)).toBe("contacts");
-      expect(getTableName(contactSegments)).toBe("contact_segments");
-      expect(getTableName(contactTopics)).toBe("contact_topics");
       expect(getTableName(broadcasts)).toBe("broadcasts");
       expect(getTableName(webhooks)).toBe("webhooks");
       expect(getTableName(templates)).toBe("templates");
-      expect(getTableName(properties)).toBe("properties");
       expect(getTableName(logs)).toBe("logs");
-    });
-  });
-
-  describe("Enums define correct values", () => {
-    it("email_status has 12 values", () => {
-      expect(emailStatusEnum.enumValues).toEqual([
-        "queued",
-        "scheduled",
-        "sent",
-        "delivered",
-        "delivery_delayed",
-        "bounced",
-        "complained",
-        "opened",
-        "clicked",
-        "failed",
-        "canceled",
-        "suppressed",
-      ]);
-    });
-
-    it("domain_status has 5 values", () => {
-      expect(domainStatusEnum.enumValues).toEqual([
-        "pending",
-        "verified",
-        "failed",
-        "temporary_failure",
-        "not_started",
-      ]);
-    });
-
-    it("permission_type has 2 values", () => {
-      expect(permissionTypeEnum.enumValues).toEqual([
-        "full_access",
-        "sending_access",
-      ]);
-    });
-
-    it("broadcast_status has 5 values", () => {
-      expect(broadcastStatusEnum.enumValues).toEqual([
-        "draft",
-        "scheduled",
-        "queued",
-        "sent",
-        "failed",
-      ]);
-    });
-
-    it("topic_visibility has 2 values", () => {
-      expect(topicVisibilityEnum.enumValues).toEqual(["public", "private"]);
-    });
-
-    it("topic_default_subscription has 2 values", () => {
-      expect(topicDefaultSubscriptionEnum.enumValues).toEqual([
-        "opt_in",
-        "opt_out",
-      ]);
-    });
-
-    it("webhook_event has 17 values", () => {
-      expect(webhookEventEnum.enumValues).toHaveLength(17);
-      expect(webhookEventEnum.enumValues).toContain("email.sent");
-      expect(webhookEventEnum.enumValues).toContain("email.delivered");
-      expect(webhookEventEnum.enumValues).toContain("domain.created");
-      expect(webhookEventEnum.enumValues).toContain("contact.created");
     });
   });
 
@@ -121,19 +41,25 @@ describe("Database schema", () => {
       expect(cols.subject).toBeDefined();
       expect(cols.html).toBeDefined();
       expect(cols.text).toBeDefined();
+      expect(cols.status).toBeDefined();
       expect(cols.tags).toBeDefined();
-      expect(cols.lastEvent).toBeDefined();
+      expect(cols.headers).toBeDefined();
+      expect(cols.attachments).toBeDefined();
       expect(cols.scheduledAt).toBeDefined();
       expect(cols.createdAt).toBeDefined();
-      expect(cols.apiKeyId).toBeDefined();
-      expect(cols.domainId).toBeDefined();
-      expect(cols.sesMessageId).toBeDefined();
+      expect(cols.document).toBeDefined();
     });
 
     it("from and subject are not nullable", () => {
       const cols = getTableColumns(emails);
       expect(cols.from.notNull).toBe(true);
       expect(cols.subject.notNull).toBe(true);
+    });
+
+    it("does not have apiKeyId or domainId columns", () => {
+      const cols = getTableColumns(emails);
+      expect((cols as Record<string, unknown>).apiKeyId).toBeUndefined();
+      expect((cols as Record<string, unknown>).domainId).toBeUndefined();
     });
   });
 
@@ -144,13 +70,13 @@ describe("Database schema", () => {
       expect(cols.name).toBeDefined();
       expect(cols.status).toBeDefined();
       expect(cols.region).toBeDefined();
-      expect(cols.clickTracking).toBeDefined();
-      expect(cols.openTracking).toBeDefined();
-      expect(cols.tls).toBeDefined();
-      expect(cols.customReturnPath).toBeDefined();
-      expect(cols.sendingEnabled).toBeDefined();
-      expect(cols.receivingEnabled).toBeDefined();
+      expect(cols.dkimTokens).toBeDefined();
       expect(cols.records).toBeDefined();
+      expect(cols.trackClicks).toBeDefined();
+      expect(cols.trackOpens).toBeDefined();
+      expect(cols.tls).toBeDefined();
+      expect(cols.createdAt).toBeDefined();
+      expect(cols.document).toBeDefined();
     });
 
     it("name is not nullable", () => {
@@ -164,17 +90,17 @@ describe("Database schema", () => {
       const cols = getTableColumns(apiKeys);
       expect(cols.id).toBeDefined();
       expect(cols.name).toBeDefined();
-      expect(cols.hashedKey).toBeDefined();
-      expect(cols.keyPrefix).toBeDefined();
+      expect(cols.tokenHash).toBeDefined();
+      expect(cols.tokenPreview).toBeDefined();
       expect(cols.permission).toBeDefined();
-      expect(cols.domainId).toBeDefined();
+      expect(cols.domain).toBeDefined();
       expect(cols.createdAt).toBeDefined();
+      expect(cols.document).toBeDefined();
     });
 
-    it("hashedKey is unique and not nullable", () => {
+    it("tokenHash is not nullable", () => {
       const cols = getTableColumns(apiKeys);
-      expect(cols.hashedKey.notNull).toBe(true);
-      expect(cols.hashedKey.isUnique).toBe(true);
+      expect(cols.tokenHash.notNull).toBe(true);
     });
   });
 
@@ -186,7 +112,11 @@ describe("Database schema", () => {
       expect(cols.firstName).toBeDefined();
       expect(cols.lastName).toBeDefined();
       expect(cols.unsubscribed).toBeDefined();
-      expect(cols.properties).toBeDefined();
+      expect(cols.customProperties).toBeDefined();
+      expect(cols.segments).toBeDefined();
+      expect(cols.topicSubscriptions).toBeDefined();
+      expect(cols.createdAt).toBeDefined();
+      expect(cols.document).toBeDefined();
     });
   });
 
@@ -195,14 +125,17 @@ describe("Database schema", () => {
       const cols = getTableColumns(broadcasts);
       expect(cols.id).toBeDefined();
       expect(cols.name).toBeDefined();
-      expect(cols.segmentId).toBeDefined();
+      expect(cols.status).toBeDefined();
       expect(cols.from).toBeDefined();
       expect(cols.subject).toBeDefined();
       expect(cols.html).toBeDefined();
-      expect(cols.text).toBeDefined();
+      expect(cols.replyTo).toBeDefined();
+      expect(cols.previewText).toBeDefined();
+      expect(cols.audienceId).toBeDefined();
       expect(cols.topicId).toBeDefined();
-      expect(cols.status).toBeDefined();
       expect(cols.scheduledAt).toBeDefined();
+      expect(cols.createdAt).toBeDefined();
+      expect(cols.document).toBeDefined();
     });
   });
 
@@ -210,16 +143,16 @@ describe("Database schema", () => {
     it("has all required columns", () => {
       const cols = getTableColumns(webhooks);
       expect(cols.id).toBeDefined();
-      expect(cols.endpoint).toBeDefined();
-      expect(cols.events).toBeDefined();
-      expect(cols.signingSecret).toBeDefined();
-      expect(cols.active).toBeDefined();
+      expect(cols.url).toBeDefined();
+      expect(cols.eventTypes).toBeDefined();
+      expect(cols.status).toBeDefined();
+      expect(cols.createdAt).toBeDefined();
+      expect(cols.document).toBeDefined();
     });
 
-    it("endpoint and signingSecret are not nullable", () => {
+    it("url is not nullable", () => {
       const cols = getTableColumns(webhooks);
-      expect(cols.endpoint.notNull).toBe(true);
-      expect(cols.signingSecret.notNull).toBe(true);
+      expect(cols.url.notNull).toBe(true);
     });
   });
 
@@ -229,12 +162,14 @@ describe("Database schema", () => {
       expect(cols.id).toBeDefined();
       expect(cols.name).toBeDefined();
       expect(cols.alias).toBeDefined();
+      expect(cols.status).toBeDefined();
       expect(cols.from).toBeDefined();
       expect(cols.subject).toBeDefined();
       expect(cols.html).toBeDefined();
       expect(cols.text).toBeDefined();
       expect(cols.variables).toBeDefined();
-      expect(cols.published).toBeDefined();
+      expect(cols.createdAt).toBeDefined();
+      expect(cols.document).toBeDefined();
     });
   });
 
@@ -242,28 +177,39 @@ describe("Database schema", () => {
     it("has all required columns for API request logging", () => {
       const cols = getTableColumns(logs);
       expect(cols.id).toBeDefined();
+      expect(cols.endpoint).toBeDefined();
+      expect(cols.status).toBeDefined();
       expect(cols.method).toBeDefined();
-      expect(cols.path).toBeDefined();
-      expect(cols.statusCode).toBeDefined();
-      expect(cols.apiKeyId).toBeDefined();
+      expect(cols.userAgent).toBeDefined();
       expect(cols.requestBody).toBeDefined();
       expect(cols.responseBody).toBeDefined();
-      expect(cols.duration).toBeDefined();
+      expect(cols.createdAt).toBeDefined();
+      expect(cols.document).toBeDefined();
     });
   });
 
-  describe("Join tables", () => {
-    it("contact_segments links contacts to segments", () => {
-      const cols = getTableColumns(contactSegments);
-      expect(cols.contactId).toBeDefined();
-      expect(cols.segmentId).toBeDefined();
+  describe("Segments table columns", () => {
+    it("has all required columns", () => {
+      const cols = getTableColumns(segments);
+      expect(cols.id).toBeDefined();
+      expect(cols.name).toBeDefined();
+      expect(cols.contactsCount).toBeDefined();
+      expect(cols.unsubscribedCount).toBeDefined();
+      expect(cols.createdAt).toBeDefined();
+      expect(cols.document).toBeDefined();
     });
+  });
 
-    it("contact_topics links contacts to topics", () => {
-      const cols = getTableColumns(contactTopics);
-      expect(cols.contactId).toBeDefined();
-      expect(cols.topicId).toBeDefined();
-      expect(cols.subscribed).toBeDefined();
+  describe("Topics table columns", () => {
+    it("has all required columns", () => {
+      const cols = getTableColumns(topics);
+      expect(cols.id).toBeDefined();
+      expect(cols.name).toBeDefined();
+      expect(cols.description).toBeDefined();
+      expect(cols.defaultSubscription).toBeDefined();
+      expect(cols.visibility).toBeDefined();
+      expect(cols.createdAt).toBeDefined();
+      expect(cols.document).toBeDefined();
     });
   });
 });

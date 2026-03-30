@@ -14,7 +14,7 @@ import { useCallback, useState } from "react";
 export interface ApiKeyRow {
   id: string;
   name: string;
-  keyPrefix: string;
+  tokenPreview: string;
   permission: "full_access" | "sending_access";
   lastUsedAt: string | null;
   createdAt: string;
@@ -87,7 +87,7 @@ export function ApiKeysList({ keys, domains }: ApiKeysListProps) {
     const matchesSearch =
       search === "" ||
       k.name.toLowerCase().includes(search.toLowerCase()) ||
-      k.keyPrefix.toLowerCase().includes(search.toLowerCase());
+      k.tokenPreview.toLowerCase().includes(search.toLowerCase());
     const matchesPerm = permFilter === "all" || k.permission === permFilter;
     return matchesSearch && matchesPerm;
   });
@@ -115,11 +115,11 @@ export function ApiKeysList({ keys, domains }: ApiKeysListProps) {
       ),
     },
     {
-      key: "keyPrefix",
+      key: "tokenPreview",
       header: "Token",
       render: (row) => (
         <span className="font-mono text-[#A1A4A5] text-[13px]">
-          {row.keyPrefix}
+          {row.tokenPreview}
         </span>
       ),
     },
@@ -196,7 +196,7 @@ export function ApiKeysList({ keys, domains }: ApiKeysListProps) {
       "Name,Token,Permission,Last Used,Created",
       ...filtered.map(
         (k) =>
-          `${k.name},${k.keyPrefix},${formatPermission(k.permission)},${k.lastUsedAt ?? "Never"},${k.createdAt}`,
+          `${k.name},${k.tokenPreview},${formatPermission(k.permission)},${k.lastUsedAt ?? "Never"},${k.createdAt}`,
       ),
     ].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });

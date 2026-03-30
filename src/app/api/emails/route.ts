@@ -1,6 +1,6 @@
 import { unauthorizedResponse, validateApiKey } from "@/lib/api-auth";
 import { db } from "@/lib/db";
-import { emailEvents, emails } from "@/lib/db/schema";
+import { emails } from "@/lib/db/schema";
 import { sendEmail as sesSendEmail } from "@/lib/ses";
 import { desc, eq, gt, lt } from "drizzle-orm";
 
@@ -80,25 +80,19 @@ export async function POST(request: Request): Promise<Response> {
       .values({
         from: body.from,
         to,
-        cc: cc ?? null,
-        bcc: bcc ?? null,
-        replyTo: replyTo?.[0] ?? null,
+        cc: cc ?? [],
+        bcc: bcc ?? [],
+        replyTo: replyTo ?? [],
         subject: body.subject,
-        html: body.html ?? null,
-        text: body.text ?? null,
-        tags: body.tags ?? null,
-        lastEvent: "sent",
+        html: body.html ?? "",
+        text: body.text ?? "",
+        tags: body.tags ?? [],
+        headers: body.headers ?? {},
+        attachments: body.attachments ?? [],
+        status: "sent",
         scheduledAt: body.scheduled_at ? new Date(body.scheduled_at) : null,
-        apiKeyId: auth.apiKeyId,
-        sesMessageId: sesResult.id,
       })
       .returning({ id: emails.id });
-
-    // Record sent event
-    await db.insert(emailEvents).values({
-      emailId: email.id,
-      type: "sent",
-    });
 
     return Response.json({ id: email.id });
   } catch (err) {
@@ -131,7 +125,7 @@ export async function GET(request: Request): Promise<Response> {
         cc: emails.cc,
         bcc: emails.bcc,
         replyTo: emails.replyTo,
-        lastEvent: emails.lastEvent,
+        status: emails.status,
         scheduledAt: emails.scheduledAt,
         createdAt: emails.createdAt,
       })
@@ -161,7 +155,7 @@ export async function GET(request: Request): Promise<Response> {
         cc: e.cc,
         bcc: e.bcc,
         reply_to: e.replyTo,
-        last_event: e.lastEvent,
+        last_event: e.status,
         scheduled_at: e.scheduledAt,
         created_at: e.createdAt,
       })),
