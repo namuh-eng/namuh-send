@@ -4,6 +4,8 @@
 
 Give it any URL → It inspects, builds, tests, and deploys a working clone.
 
+**Stop paying for SaaS. Clone it.** Resend took $21M and years. Ralph did it in an afternoon.
+
 ![Ralph-to-Ralph Architecture](docs/assets/architecture-diagram.png)
 
 ## 5 Hours. Zero Human Code. Deployed to AWS.
