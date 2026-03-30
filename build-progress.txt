@@ -1116,3 +1116,39 @@
 - src/app/api/metrics/route.ts — Metrics aggregation API endpoint
 - src/app/(dashboard)/metrics/page.tsx — Updated to render MetricsPage component
 - tests/metrics-page.test.ts — 7 unit tests for component structure and collapsible behavior
+
+## Iteration 54 — feature-037: Deliverability Rate Section (2026-03-30)
+
+### What was built
+- DeliverabilitySection client component (`src/components/deliverability-section.tsx`) with:
+  - Event type filter dropdown (11 options: All Events + Received, Delivered, Opened, Clicked, Bounced, Complained, Unsubscribed, Delivery Delayed, Failed, Suppressed) using existing DropdownFilter component with colored dots
+  - SVG line/area chart with green gradient fill, daily date axis, auto-scaling Y-axis, responsive viewBox
+  - Per-domain breakdown table showing domain name, email count in parentheses, deliverability percentage with green checkmark for 100%
+  - `calculateDeliverabilityRate()` utility function exported for testing
+  - `EVENT_TYPE_OPTIONS` exported for testing
+- Extended `/api/metrics` API route with:
+  - `dailyData` — daily email counts grouped by date, optionally filtered by event type via `event_type` query param
+  - `domainBreakdown` — per-domain deliverability rates (domain, count, rate)
+  - Event type to email status mapping (e.g., bounced → bounced/hard_bounced/soft_bounced)
+- Integrated DeliverabilitySection into MetricsPage, replacing placeholder content
+- Added `eventType` state to MetricsPage, passed through to API call and component
+
+### Test results
+- 11 new unit tests passing (deliverability rate calculation: 2, event type filter: 4, SVG chart: 3, domain breakdown: 2)
+- 1 E2E test written (event type filter dropdown interaction — open, verify all options, select and verify label change)
+- 405 total unit tests passing (394 previous + 11 new), no regressions
+- make check: all changed files pass typecheck + lint
+
+### Decisions
+- Used 11 event type options (All Events + 10 individual types) matching the screenshot exactly
+- Event type filter maps to email status values for SQL filtering (e.g., "bounced" maps to bounced/hard_bounced/soft_bounced)
+- SVG chart uses line+area fill with green gradient, auto-scales Y-axis, skips X-axis labels to avoid overlap
+- Domain breakdown shows count in parentheses like screenshot: "domain.com (3)"
+- Reused existing DropdownFilter component with colored dots per event type
+
+### Files changed
+- src/components/deliverability-section.tsx — DeliverabilitySection component with event filter, SVG chart, domain breakdown
+- src/components/metrics-page.tsx — Updated to integrate DeliverabilitySection, added eventType state
+- src/app/api/metrics/route.ts — Extended with dailyData, domainBreakdown, event_type filtering
+- tests/deliverability-section.test.ts — 11 unit tests for deliverability section
+- tests/e2e/metrics-deliverability.spec.ts — E2E test for event type filter interaction

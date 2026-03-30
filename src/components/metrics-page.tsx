@@ -7,6 +7,7 @@ import {
   type ComboboxOption,
 } from "@/components/combobox-filter";
 import { DateRangePicker } from "@/components/date-range-picker";
+import { DeliverabilitySection } from "@/components/deliverability-section";
 import { useCallback, useEffect, useState } from "react";
 
 // ── Date range preset → API param mapping ───────────────────────────
@@ -22,12 +23,25 @@ const DATE_RANGE_TO_API: Record<string, string> = {
 
 // ── Types ───────────────────────────────────────────────────────────
 
+interface DailyDataPoint {
+  date: string;
+  count: number;
+}
+
+interface DomainBreakdownEntry {
+  domain: string;
+  rate: number;
+  count: number;
+}
+
 interface MetricsData {
   totalEmails: number;
   deliverabilityRate: number;
   bounceRate: number;
   complainRate: number;
   domains: string[];
+  dailyData: DailyDataPoint[];
+  domainBreakdown: DomainBreakdownEntry[];
   lastUpdated: string;
 }
 
@@ -110,6 +124,7 @@ export function MetricSection({
 export function MetricsPage() {
   const [dateRange, setDateRange] = useState("Last 15 days");
   const [domain, setDomain] = useState("all");
+  const [eventType, setEventType] = useState("all");
   const [data, setData] = useState<MetricsData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -120,6 +135,9 @@ export function MetricsPage() {
     if (domain !== "all") {
       params.set("domain", domain);
     }
+    if (eventType !== "all") {
+      params.set("event_type", eventType);
+    }
     try {
       const res = await fetch(`/api/metrics?${params.toString()}`);
       if (res.ok) {
@@ -129,7 +147,7 @@ export function MetricsPage() {
     } finally {
       setLoading(false);
     }
-  }, [dateRange, domain]);
+  }, [dateRange, domain, eventType]);
 
   useEffect(() => {
     fetchMetrics();
@@ -173,22 +191,17 @@ export function MetricsPage() {
           value={loading ? "—" : `${data?.deliverabilityRate ?? 0}%`}
           defaultOpen={true}
         >
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-8">
-              <div>
-                <div className="text-[11px] font-semibold tracking-wider text-[#A1A4A5] uppercase">
-                  Emails
-                </div>
-                <div className="text-2xl font-semibold text-[#F0F0F0]">
-                  {loading ? "—" : (data?.totalEmails ?? 0)}
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* Chart placeholder — implemented in feature-037 */}
-          <div className="h-[200px] flex items-center justify-center text-[#A1A4A5] text-[13px]">
-            {loading ? "Loading..." : "No data for this period"}
-          </div>
+          <DeliverabilitySection
+            data={{
+              totalEmails: data?.totalEmails ?? 0,
+              deliverabilityRate: data?.deliverabilityRate ?? 0,
+              dailyData: data?.dailyData ?? [],
+              domainBreakdown: data?.domainBreakdown ?? [],
+            }}
+            loading={loading}
+            eventType={eventType}
+            onEventTypeChange={setEventType}
+          />
         </MetricSection>
 
         {/* Bounce Rate section */}

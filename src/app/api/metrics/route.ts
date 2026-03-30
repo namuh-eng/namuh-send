@@ -1,4 +1,4 @@
-// ABOUTME: Metrics API endpoint — returns aggregated email stats for deliverability, bounce, and complain rates
+// ABOUTME: Metrics API endpoint — returns aggregated email stats, daily chart data, and per-domain breakdown
 
 import { db } from "@/lib/db";
 import { emails } from "@/lib/db/schema";
@@ -12,6 +12,20 @@ const RANGE_MAP: Record<string, number> = {
   last_7_days: 7,
   last_15_days: 15,
   last_30_days: 30,
+};
+
+// Map event type filter values to email status values
+const EVENT_TYPE_TO_STATUS: Record<string, string[]> = {
+  received: ["delivered", "opened", "clicked"],
+  delivered: ["delivered"],
+  opened: ["opened"],
+  clicked: ["clicked"],
+  bounced: ["bounced", "hard_bounced", "soft_bounced"],
+  complained: ["complained"],
+  unsubscribed: ["unsubscribed"],
+  delivery_delayed: ["delivery_delayed"],
+  failed: ["failed"],
+  suppressed: ["suppressed"],
 };
 
 function getDateRange(range: string): Date {
@@ -38,6 +52,7 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const range = searchParams.get("range") || "last_15_days";
   const domain = searchParams.get("domain");
+  const eventType = searchParams.get("event_type");
 
   const startDate = getDateRange(range);
 
@@ -79,17 +94,51 @@ export async function GET(request: NextRequest) {
       ? Math.round((stats.complained / totalEmails) * 10000) / 100
       : 0;
 
-  // Get unique domains from the emails table
-  const domainRows = await db
+  // Build daily chart query — optionally filtered by event type
+  const dailyConditions = [...conditions];
+  if (eventType && eventType !== "all" && EVENT_TYPE_TO_STATUS[eventType]) {
+    const statuses = EVENT_TYPE_TO_STATUS[eventType];
+    const statusList = statuses.map((s) => `'${s}'`).join(",");
+    dailyConditions.push(sql`${emails.status} in (${sql.raw(statusList)})`);
+  }
+
+  const dailyRows = await db
     .select({
-      domain: sql<string>`distinct substring(${emails.from} from '@([^>]+)')`,
+      date: sql<string>`to_char(${emails.createdAt}::date, 'YYYY-MM-DD')`,
+      count: sql<number>`count(*)::int`,
     })
     .from(emails)
-    .where(gte(emails.createdAt, startDate));
+    .where(and(...dailyConditions))
+    .groupBy(sql`${emails.createdAt}::date`)
+    .orderBy(sql`${emails.createdAt}::date`);
 
-  const domains = domainRows
-    .map((r) => r.domain)
-    .filter((d): d is string => d !== null && d !== "");
+  const dailyData = dailyRows.map((r) => ({
+    date: r.date,
+    count: r.count,
+  }));
+
+  // Per-domain breakdown
+  const domainBreakdownRows = await db
+    .select({
+      domain: sql<string>`substring(${emails.from} from '@([^>]+)')`,
+      total: sql<number>`count(*)::int`,
+      delivered: sql<number>`count(*) filter (where ${emails.status} = 'delivered')::int`,
+    })
+    .from(emails)
+    .where(and(...conditions))
+    .groupBy(sql`substring(${emails.from} from '@([^>]+)')`)
+    .orderBy(sql`count(*) desc`);
+
+  const domainBreakdown = domainBreakdownRows
+    .filter((r) => r.domain !== null && r.domain !== "")
+    .map((r) => ({
+      domain: r.domain,
+      count: r.total,
+      rate: r.total > 0 ? Math.round((r.delivered / r.total) * 10000) / 100 : 0,
+    }));
+
+  // Get unique domain names for the filter
+  const domains = domainBreakdown.map((d) => d.domain);
 
   return NextResponse.json({
     totalEmails,
@@ -97,6 +146,8 @@ export async function GET(request: NextRequest) {
     bounceRate,
     complainRate,
     domains,
+    dailyData,
+    domainBreakdown,
     lastUpdated: new Date().toISOString(),
   });
 }
