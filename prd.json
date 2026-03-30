@@ -2088,7 +2088,7 @@
     "data_model": "Bounce rate = (permanent + transient + undetermined) / sent * 100. Bounce types: permanent (hard bounce), transient (soft bounce), undetermined.",
     "priority": 16,
     "core": false,
-    "passes": false,
+    "passes": true,
     "tests": {
       "unit": [
         {

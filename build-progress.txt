@@ -1152,3 +1152,40 @@
 - src/app/api/metrics/route.ts — Extended with dailyData, domainBreakdown, event_type filtering
 - tests/deliverability-section.test.ts — 11 unit tests for deliverability section
 - tests/e2e/metrics-deliverability.spec.ts — E2E test for event type filter interaction
+
+## Iteration 56 — feature-038: Bounce Rate Section (2026-03-30)
+
+### What was built
+- BounceRateSection component (`src/components/bounce-rate-section.tsx`) with:
+  - `calculateBounceRate()` — exported function: (permanent + transient + undetermined) / sent * 100, rounded to 2dp
+  - SVG line/area chart with 0-8% Y-axis scale, red color theme (#EF4444)
+  - Breakdown table: Transient, Permanent, Undetermined rows with individual percentages
+  - Each breakdown row links to `/emails?statuses=bounced&startDate=...&endDate=...`
+  - Info panel overlay ("How Bounce Rate Works") with bounce type definitions, risk level warning (>4%), formula, article links
+  - Info panel opens via info chevron button, closes via X button or Escape key
+- Enhanced metrics API (`src/app/api/metrics/route.ts`):
+  - Added `hard_bounced`, `soft_bounced`, `undetermined_bounced` aggregate counts
+  - Added daily bounce rate query (percentage per day)
+  - Response now includes `bounceBreakdown` (permanent/transient/undetermined) and `dailyBounceData`
+- Wired BounceRateSection into MetricsPage, replacing placeholder
+
+### Test results
+- 12 new unit tests passing (calculateBounceRate: 3, component: 9 — chart, breakdown, info panel, links, loading)
+- 3 E2E tests written (info panel open/close, breakdown table, Escape key)
+- 417 total unit tests passing, no regressions
+- make check: typecheck + lint passing (1 pre-existing error in scripts/demo-slide.tsx)
+
+### Decisions
+- Mapped DB statuses: hard_bounced → Permanent, soft_bounced → Transient, bounced → Undetermined
+- Chart Y-axis fixed at 0-8% (matching original product's bounce rate scale)
+- Used red color theme (#EF4444) to differentiate from deliverability's green (#22C55E)
+- Info panel uses fixed overlay with backdrop click + Escape key dismiss
+- Breakdown links include date range params derived from currently selected date range
+
+### Files changed
+- src/components/bounce-rate-section.tsx — New: BounceRateSection with chart, breakdown, info panel
+- src/components/metrics-page.tsx — Updated: imports BounceRateSection, passes bounce data props
+- src/app/api/metrics/route.ts — Enhanced: bounce breakdown counts, daily bounce rate data
+- tests/bounce-rate-section.test.ts — 12 unit tests
+- tests/e2e/bounce-rate.spec.ts — 3 E2E tests
+- prd.json — feature-038 passes: true

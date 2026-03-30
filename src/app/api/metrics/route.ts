@@ -68,6 +68,9 @@ export async function GET(request: NextRequest) {
       total: sql<number>`count(*)::int`,
       delivered: sql<number>`count(*) filter (where ${emails.status} = 'delivered')::int`,
       bounced: sql<number>`count(*) filter (where ${emails.status} in ('bounced', 'hard_bounced', 'soft_bounced'))::int`,
+      hard_bounced: sql<number>`count(*) filter (where ${emails.status} = 'hard_bounced')::int`,
+      soft_bounced: sql<number>`count(*) filter (where ${emails.status} = 'soft_bounced')::int`,
+      undetermined_bounced: sql<number>`count(*) filter (where ${emails.status} = 'bounced')::int`,
       complained: sql<number>`count(*) filter (where ${emails.status} = 'complained')::int`,
     })
     .from(emails)
@@ -77,6 +80,9 @@ export async function GET(request: NextRequest) {
     total: 0,
     delivered: 0,
     bounced: 0,
+    hard_bounced: 0,
+    soft_bounced: 0,
+    undetermined_bounced: 0,
     complained: 0,
   };
 
@@ -117,6 +123,23 @@ export async function GET(request: NextRequest) {
     count: r.count,
   }));
 
+  // Daily bounce rate data (percentage per day)
+  const dailyBounceRows = await db
+    .select({
+      date: sql<string>`to_char(${emails.createdAt}::date, 'YYYY-MM-DD')`,
+      total: sql<number>`count(*)::int`,
+      bounced: sql<number>`count(*) filter (where ${emails.status} in ('bounced', 'hard_bounced', 'soft_bounced'))::int`,
+    })
+    .from(emails)
+    .where(and(...conditions))
+    .groupBy(sql`${emails.createdAt}::date`)
+    .orderBy(sql`${emails.createdAt}::date`);
+
+  const dailyBounceData = dailyBounceRows.map((r) => ({
+    date: r.date,
+    rate: r.total > 0 ? Math.round((r.bounced / r.total) * 10000) / 100 : 0,
+  }));
+
   // Per-domain breakdown
   const domainBreakdownRows = await db
     .select({
@@ -148,6 +171,12 @@ export async function GET(request: NextRequest) {
     domains,
     dailyData,
     domainBreakdown,
+    bounceBreakdown: {
+      permanent: stats.hard_bounced,
+      transient: stats.soft_bounced,
+      undetermined: stats.undetermined_bounced,
+    },
+    dailyBounceData,
     lastUpdated: new Date().toISOString(),
   });
 }

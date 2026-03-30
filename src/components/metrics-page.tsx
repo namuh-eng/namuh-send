@@ -2,6 +2,7 @@
 
 "use client";
 
+import { BounceRateSection } from "@/components/bounce-rate-section";
 import {
   ComboboxFilter,
   type ComboboxOption,
@@ -34,6 +35,17 @@ interface DomainBreakdownEntry {
   count: number;
 }
 
+interface BounceBreakdown {
+  permanent: number;
+  transient: number;
+  undetermined: number;
+}
+
+interface DailyBouncePoint {
+  date: string;
+  rate: number;
+}
+
 interface MetricsData {
   totalEmails: number;
   deliverabilityRate: number;
@@ -42,6 +54,8 @@ interface MetricsData {
   domains: string[];
   dailyData: DailyDataPoint[];
   domainBreakdown: DomainBreakdownEntry[];
+  bounceBreakdown: BounceBreakdown;
+  dailyBounceData: DailyBouncePoint[];
   lastUpdated: string;
 }
 
@@ -209,12 +223,20 @@ export function MetricsPage() {
           title="BOUNCE RATE"
           value={loading ? "—" : `${data?.bounceRate ?? 0}%`}
           defaultOpen={true}
-          infoButton={true}
+          infoButton={false}
         >
-          {/* Chart placeholder — implemented in feature-038 */}
-          <div className="h-[200px] flex items-center justify-center text-[#A1A4A5] text-[13px]">
-            {loading ? "Loading..." : "No data for this period"}
-          </div>
+          <BounceRateSection
+            data={{
+              bounceRate: data?.bounceRate ?? 0,
+              permanent: data?.bounceBreakdown?.permanent ?? 0,
+              transient: data?.bounceBreakdown?.transient ?? 0,
+              undetermined: data?.bounceBreakdown?.undetermined ?? 0,
+              sent: data?.totalEmails ?? 0,
+              dailyBounceData: data?.dailyBounceData ?? [],
+            }}
+            loading={loading}
+            dateRange={dateRange}
+          />
         </MetricSection>
 
         {/* Complain Rate section */}
