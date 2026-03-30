@@ -2,6 +2,8 @@
 
 **Autonomous Product Cloning Loop**
 
+> **Want to clone your own SaaS?** Use the template repo: [namuh-eng/ralph-to-ralph](https://github.com/namuh-eng/ralph-to-ralph/tree/main)
+
 Give it any URL → It inspects, builds, tests, and deploys a working clone.
 
 **Stop paying for SaaS. Clone it.** Resend took $21M and years. Ralph did it in an afternoon.
