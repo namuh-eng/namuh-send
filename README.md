@@ -81,6 +81,10 @@ A strict watchdog wraps the entire pipeline, ensuring all Ralph loops stay stabl
 
 We ran Ralph-to-Ralph against [resend.com](https://resend.com) — an email API platform for developers.
 
+### Video Demo — Sending a Real Email
+
+https://github.com/jaeyunha/ralph-to-ralph-prod/raw/main/docs/assets/demo-send-email.mp4
+
 **Live deployed clone:** [zjucbjapsn.us-east-1.awsapprunner.com](https://zjucbjapsn.us-east-1.awsapprunner.com)
 
 > Request an API key from the team to access the dashboard and send emails.
