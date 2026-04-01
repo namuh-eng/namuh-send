@@ -29,7 +29,13 @@ export function AddContactModal({
 
   const fetchSegments = useCallback(async () => {
     try {
-      const res = await fetch("/api/segments");
+      const apiKey =
+        typeof window !== "undefined"
+          ? (localStorage?.getItem?.("api_key") ?? null)
+          : null;
+      const authHeaders: Record<string, string> = {};
+      if (apiKey) authHeaders.Authorization = `Bearer ${apiKey}`;
+      const res = await fetch("/api/segments", { headers: authHeaders });
       if (res.ok) {
         const data = await res.json();
         setSegments(data);
@@ -104,9 +110,17 @@ export function AddContactModal({
 
     setSubmitting(true);
     try {
+      const apiKey =
+        typeof window !== "undefined"
+          ? (localStorage?.getItem?.("api_key") ?? null)
+          : null;
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
       const res = await fetch("/api/contacts", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           emails,
           segment_ids: selectedSegments.map((s) => s.id),

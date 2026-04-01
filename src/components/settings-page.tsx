@@ -37,7 +37,11 @@ export function SettingsPage() {
 
   useEffect(() => {
     if (activeTab === "usage") {
-      fetch("/api/usage")
+      const apiKey =
+        typeof window !== "undefined" ? localStorage.getItem("api_key") : null;
+      const authHeaders: Record<string, string> = {};
+      if (apiKey) authHeaders.Authorization = `Bearer ${apiKey}`;
+      fetch("/api/usage", { headers: authHeaders })
         .then((r) => r.json())
         .then((data) => setUsage(data))
         .catch(() => {});

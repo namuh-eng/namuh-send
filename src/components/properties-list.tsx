@@ -282,9 +282,17 @@ function AddPropertyModal({
     setSubmitting(true);
     setError("");
     try {
+      const apiKey =
+        typeof window !== "undefined"
+          ? (localStorage?.getItem?.("api_key") ?? null)
+          : null;
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
       const res = await fetch("/api/properties", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           name: name.trim(),
           type,

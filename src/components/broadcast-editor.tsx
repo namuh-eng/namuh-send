@@ -222,10 +222,16 @@ export function BroadcastEditor({
   useEffect(() => {
     const loadOptions = async () => {
       try {
+        const apiKey =
+          typeof window !== "undefined"
+            ? (localStorage?.getItem?.("api_key") ?? null)
+            : null;
+        const authHeaders: Record<string, string> = {};
+        if (apiKey) authHeaders.Authorization = `Bearer ${apiKey}`;
         const [domainsRes, segmentsRes, topicsRes] = await Promise.all([
-          fetch("/api/domains"),
-          fetch("/api/segments?limit=100"),
-          fetch("/api/topics?limit=100"),
+          fetch("/api/domains", { headers: authHeaders }),
+          fetch("/api/segments?limit=100", { headers: authHeaders }),
+          fetch("/api/topics?limit=100", { headers: authHeaders }),
         ]);
         if (domainsRes.ok) {
           const d = await domainsRes.json();

@@ -230,6 +230,35 @@ export function DomainsPage({ domains }: DomainsPageProps) {
             setNewDomain("");
           }}
           title="Add domain"
+          actionLabel={adding ? "Adding..." : "Add"}
+          actionDisabled={!newDomain.trim() || adding}
+          onAction={async () => {
+            setAdding(true);
+            try {
+              const apiKey =
+                typeof window !== "undefined"
+                  ? localStorage.getItem("api_key")
+                  : null;
+              const headers: Record<string, string> = {
+                "Content-Type": "application/json",
+              };
+              if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
+              const res = await fetch("/api/domains", {
+                method: "POST",
+                headers,
+                body: JSON.stringify({ name: newDomain.trim() }),
+              });
+              if (res.ok) {
+                const data = await res.json();
+                setShowAddModal(false);
+                setNewDomain("");
+                router.push(`/domains/${data.id}`);
+                router.refresh();
+              }
+            } finally {
+              setAdding(false);
+            }
+          }}
         >
           <p className="text-[13px] text-[#A1A4A5] mb-4">
             Enter the domain you want to verify for sending emails.
@@ -239,46 +268,8 @@ export function DomainsPage({ domains }: DomainsPageProps) {
             value={newDomain}
             onChange={(e) => setNewDomain(e.target.value)}
             placeholder="yourdomain.com"
-            className="w-full px-3 py-2 bg-[rgba(24,25,28,0.88)] border border-[rgba(176,199,217,0.145)] rounded-lg text-[#F0F0F0] text-[14px] placeholder:text-[#52525b] mb-4 focus:outline-none focus:border-[#3b82f6]"
+            className="w-full px-3 py-2 bg-[rgba(24,25,28,0.88)] border border-[rgba(176,199,217,0.145)] rounded-lg text-[#F0F0F0] text-[14px] placeholder:text-[#52525b] focus:outline-none focus:border-[#3b82f6]"
           />
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setShowAddModal(false);
-                setNewDomain("");
-              }}
-              className="px-3 py-1.5 text-[13px] text-[#A1A4A5] border border-[rgba(176,199,217,0.145)] rounded-lg hover:bg-[rgba(176,199,217,0.1)]"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              disabled={!newDomain.trim() || adding}
-              onClick={async () => {
-                setAdding(true);
-                try {
-                  const res = await fetch("/api/domains", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name: newDomain.trim() }),
-                  });
-                  if (res.ok) {
-                    const data = await res.json();
-                    setShowAddModal(false);
-                    setNewDomain("");
-                    router.push(`/domains/${data.id}`);
-                    router.refresh();
-                  }
-                } finally {
-                  setAdding(false);
-                }
-              }}
-              className="px-3 py-1.5 bg-white text-black text-[13px] font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50 transition-colors"
-            >
-              {adding ? "Adding..." : "Add"}
-            </button>
-          </div>
         </Modal>
       )}
     </div>

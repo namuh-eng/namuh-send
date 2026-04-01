@@ -23,10 +23,10 @@ describe("deploy-001: App Runner deployment configuration", () => {
     expect(dockerfile).toContain(".next/standalone");
   });
 
-  it("Dockerfile exposes port 3000 for App Runner", () => {
+  it("Dockerfile exposes port 8080 for App Runner", () => {
     const dockerfile = readFileSync(join(root, "Dockerfile"), "utf-8");
-    expect(dockerfile).toContain("EXPOSE 3000");
-    expect(dockerfile).toContain("ENV PORT=3000");
+    expect(dockerfile).toContain("EXPOSE 8080");
+    expect(dockerfile).toContain("ENV PORT=8080");
   });
 
   it("deploy script exists and targets ECR + App Runner", () => {

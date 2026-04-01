@@ -33,7 +33,13 @@ export function TemplatesList() {
   const fetchTemplates = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/templates");
+      const apiKey =
+        typeof window !== "undefined"
+          ? (localStorage?.getItem?.("api_key") ?? null)
+          : null;
+      const authHeaders: Record<string, string> = {};
+      if (apiKey) authHeaders.Authorization = `Bearer ${apiKey}`;
+      const res = await fetch("/api/templates", { headers: authHeaders });
       const data = await res.json();
       setTemplates(data.data || []);
     } catch {
@@ -77,9 +83,17 @@ export function TemplatesList() {
 
   const handleCreate = async () => {
     try {
+      const apiKey =
+        typeof window !== "undefined"
+          ? (localStorage?.getItem?.("api_key") ?? null)
+          : null;
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
       const res = await fetch("/api/templates", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ name: "Untitled Template" }),
       });
       if (res.ok) {
@@ -93,9 +107,17 @@ export function TemplatesList() {
 
   const handleDuplicate = async (t: Template) => {
     try {
+      const apiKey =
+        typeof window !== "undefined"
+          ? (localStorage?.getItem?.("api_key") ?? null)
+          : null;
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
       const res = await fetch("/api/templates", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ name: `${t.name} (copy)` }),
       });
       if (res.ok) {

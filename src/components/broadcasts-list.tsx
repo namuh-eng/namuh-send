@@ -65,7 +65,15 @@ export function BroadcastsList() {
       if (statusFilter) params.set("status", statusFilter);
       if (audienceFilter) params.set("segmentId", audienceFilter);
 
-      const res = await fetch(`/api/broadcasts?${params.toString()}`);
+      const apiKey =
+        typeof window !== "undefined"
+          ? (localStorage?.getItem?.("api_key") ?? null)
+          : null;
+      const authHeaders: Record<string, string> = {};
+      if (apiKey) authHeaders.Authorization = `Bearer ${apiKey}`;
+      const res = await fetch(`/api/broadcasts?${params.toString()}`, {
+        headers: authHeaders,
+      });
       const data = await res.json();
       setBroadcasts(data.data || []);
       setTotal(data.total || 0);
@@ -79,7 +87,15 @@ export function BroadcastsList() {
 
   const fetchSegments = useCallback(async () => {
     try {
-      const res = await fetch("/api/segments?limit=100");
+      const apiKey =
+        typeof window !== "undefined"
+          ? (localStorage?.getItem?.("api_key") ?? null)
+          : null;
+      const authHeaders: Record<string, string> = {};
+      if (apiKey) authHeaders.Authorization = `Bearer ${apiKey}`;
+      const res = await fetch("/api/segments?limit=100", {
+        headers: authHeaders,
+      });
       const data = await res.json();
       setSegments(data.data || []);
     } catch {
@@ -169,9 +185,17 @@ export function BroadcastsList() {
 
   const handleCreateEmail = async () => {
     try {
+      const apiKey =
+        typeof window !== "undefined"
+          ? (localStorage?.getItem?.("api_key") ?? null)
+          : null;
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
       const res = await fetch("/api/broadcasts", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ name: "Untitled" }),
       });
       if (res.ok) {
@@ -185,9 +209,17 @@ export function BroadcastsList() {
 
   const handleDuplicate = async (bc: Broadcast) => {
     try {
+      const apiKey =
+        typeof window !== "undefined"
+          ? (localStorage?.getItem?.("api_key") ?? null)
+          : null;
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
       const res = await fetch("/api/broadcasts", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ name: `${bc.name} (copy)` }),
       });
       if (res.ok) {
@@ -201,7 +233,16 @@ export function BroadcastsList() {
 
   const handleRemove = async (id: string) => {
     try {
-      await fetch(`/api/broadcasts/${id}`, { method: "DELETE" });
+      const apiKey =
+        typeof window !== "undefined"
+          ? (localStorage?.getItem?.("api_key") ?? null)
+          : null;
+      const authHeaders: Record<string, string> = {};
+      if (apiKey) authHeaders.Authorization = `Bearer ${apiKey}`;
+      await fetch(`/api/broadcasts/${id}`, {
+        method: "DELETE",
+        headers: authHeaders,
+      });
       fetchBroadcasts();
     } catch {
       // ignore
