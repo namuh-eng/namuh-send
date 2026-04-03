@@ -1,4 +1,4 @@
-# Resend Clone
+# Namuh Send
 
 An open-source Resend.com clone — full email API, dashboard, domains, broadcasts, templates, webhooks, and TypeScript SDK. Built autonomously by AI agents in 5 hours at Ralphthon Seoul 2026.
 
