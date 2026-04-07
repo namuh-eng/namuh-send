@@ -9,7 +9,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 // ── Constants ─────────────────────────────────────────────────────
 
 const BUCKET = process.env.S3_BUCKET_NAME ?? "";
-const REGION = "us-east-1";
+const REGION = process.env.AWS_REGION ?? "us-east-1";
 const SUPPORTED_CONTENT_TYPES = new Set(["application/pdf", "text/html"]);
 
 // ── Client ────────────────────────────────────────────────────────

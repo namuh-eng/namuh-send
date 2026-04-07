@@ -38,7 +38,7 @@ export interface GetDomainResult {
 
 // ── Client ─────────────────────────────────────────────────────────
 
-const ses = new SESv2Client({ region: "us-east-1" });
+const ses = new SESv2Client({ region: process.env.AWS_REGION ?? "us-east-1" });
 
 // ── Email Sending ──────────────────────────────────────────────────
 
