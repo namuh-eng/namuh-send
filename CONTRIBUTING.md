@@ -2,44 +2,54 @@
 
 ## Setup
 
-1. Clone the repo and install dependencies:
-   ```bash
-   git clone https://github.com/namuh-eng/namuh-send.git
-   cd namuh-send
-   npm install
-   ```
+**Quick start** (requires Docker + Node.js):
 
-2. Copy `.env.example` to `.env` and fill in your values:
-   ```bash
-   cp .env.example .env
-   ```
-   At minimum, set `DASHBOARD_KEY` (see the example file for a generation command).
+```bash
+git clone https://github.com/namuh-eng/namuh-send.git
+cd namuh-send
+npm install
+make setup    # starts Postgres, creates .env, runs migrations, seeds DB
+make dev      # http://localhost:3015
+```
 
-3. Start Postgres (requires Docker):
-   ```bash
-   docker compose up -d
-   ```
-   This starts a Postgres 16 container on port 5432. The default `DATABASE_URL` in `.env.example` already points to it. If you prefer your own Postgres instance, update `DATABASE_URL` in `.env` instead.
+The seed prints an API key to the console — save it. Then verify everything works:
 
-4. Run migrations and seed the database:
-   ```bash
-   npm run db:push
-   npm run db:seed
-   ```
-   The seed creates a sample API key (printed to the console — save it), a domain, and a contact so the dashboard isn't empty.
+```bash
+# Check the app + database are healthy
+curl http://localhost:3015/api/health
 
-5. Start the dev server:
-   ```bash
-   npm run dev
-   # App runs at http://localhost:3015
-   ```
+# Send a test email (replace YOUR_API_KEY with the key from seed)
+curl -X POST http://localhost:3015/api/emails \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "from": "hello@example.com",
+    "to": ["test@example.com"],
+    "subject": "Hello from namuh-send",
+    "text": "It works!"
+  }'
+```
+
+Without AWS credentials, emails are logged to the console instead of sent — the full API flow still works for development.
+
+<details>
+<summary>Manual setup (without make setup)</summary>
+
+1. Copy `.env.example` to `.env` and set `DASHBOARD_KEY` (see the file for a generation command).
+2. Start Postgres: `docker compose up -d` (or point `DATABASE_URL` at your own instance).
+3. Push schema and seed: `npm run db:push && npm run db:seed`
+4. Start dev server: `npm run dev`
+
+</details>
 
 ## Ports
 
 - **3015** — dev server (`npm run dev`)
 - **8080** — production Docker image (`Dockerfile`). These are intentionally different; the Dockerfile is for deployment via App Runner, not local dev.
 
-## AWS SES sandbox
+## AWS SES (optional for local dev)
+
+AWS credentials are **not required** for local development — without them, emails are logged to the console and the full API flow still works. When you're ready to actually send emails, configure `~/.aws/credentials` via `aws configure`.
 
 New AWS accounts start in SES **sandbox mode** — you can only send emails to verified addresses. If sending fails with an access error:
 
