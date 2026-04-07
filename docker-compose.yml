@@ -1,0 +1,18 @@
+# ABOUTME: Docker Compose for local development — spins up Postgres so you don't need a manual DB setup.
+# Usage: docker compose up -d
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: namuh
+      POSTGRES_PASSWORD: namuh
+      POSTGRES_DB: namuh_send
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

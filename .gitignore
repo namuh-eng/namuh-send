@@ -16,6 +16,7 @@ dist/
 scripts/*
 !scripts/start.sh
 !scripts/postinstall-star.sh
+!scripts/seed.ts
 
 # Playwright test artifacts
 test-results/

@@ -13,17 +13,44 @@
    ```bash
    cp .env.example .env
    ```
+   At minimum, set `DASHBOARD_KEY` (see the example file for a generation command).
 
-3. Set up the database and run migrations:
+3. Start Postgres (requires Docker):
    ```bash
-   npm run db:migrate
+   docker compose up -d
    ```
+   This starts a Postgres 16 container on port 5432. The default `DATABASE_URL` in `.env.example` already points to it. If you prefer your own Postgres instance, update `DATABASE_URL` in `.env` instead.
 
-4. Start the dev server:
+4. Run migrations and seed the database:
+   ```bash
+   npm run db:push
+   npm run db:seed
+   ```
+   The seed creates a sample API key (printed to the console — save it), a domain, and a contact so the dashboard isn't empty.
+
+5. Start the dev server:
    ```bash
    npm run dev
    # App runs at http://localhost:3015
    ```
+
+## Ports
+
+- **3015** — dev server (`npm run dev`)
+- **8080** — production Docker image (`Dockerfile`). These are intentionally different; the Dockerfile is for deployment via App Runner, not local dev.
+
+## AWS SES sandbox
+
+New AWS accounts start in SES **sandbox mode** — you can only send emails to verified addresses. If sending fails with an access error:
+
+1. Go to the [SES console](https://console.aws.amazon.com/ses/) and verify a recipient email under "Verified identities"
+2. For full sending, request production access via "Account dashboard" > "Request production access"
+
+This is an AWS limitation, not a bug in namuh-send.
+
+## scripts/start.sh
+
+This script is for the **Ralph-to-Ralph autonomous cloning pipeline**, not for starting the app. To run the app locally, use `npm run dev`.
 
 ## Development
 
